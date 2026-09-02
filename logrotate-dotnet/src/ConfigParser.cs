@@ -765,6 +765,7 @@ namespace LogRotate
                             else if (key == "dateext") newlog.Flags |= LogFlags.DateExt;
                             else if (key == "nodateext") newlog.Flags &= ~LogFlags.DateExt;
                             else if (key == "dateyesterday") newlog.Flags |= LogFlags.DateYesterday;
+                            else if (key == "nodateyesterday") newlog.Flags &= ~LogFlags.DateYesterday;
                             else if (key == "datehourago") newlog.Flags |= LogFlags.DateHourAgo;
                             else if (key == "nodatehourago") newlog.Flags &= ~LogFlags.DateHourAgo;
                             else if (key == "dateformat")
