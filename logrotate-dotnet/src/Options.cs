@@ -26,9 +26,16 @@ namespace LogRotate
             Environment.GetEnvironmentVariable("LOGROTATE_MAIL")
             ?? "mail";
 
-        public static string DefaultStateFile =>
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "logrotate", "status");
+        public static string DefaultStateFile
+        {
+            get
+            {
+                string folderpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "logrotate");
+                if (!Path.Exists(folderpath))
+                    Directory.CreateDirectory(folderpath);
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "logrotate", "status");
+            }
+        }
     }
 }
