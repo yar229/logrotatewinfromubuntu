@@ -55,12 +55,12 @@ namespace logrotate.Tests.Integration
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string configContent = $@"
-{log1} {{
+""{log1}"" {{
     rotate 2
     compress
 }}
 
-{log2} {{
+""{log2}"" {{
     rotate 3
     nocompress
 }}
@@ -204,7 +204,7 @@ namespace logrotate.Tests.Integration
             string stateFile = Path.Combine(TestDir, "state.txt");
             // Multiple files on same line in one section
             string configContent = $@"
-{log1} {log2} {log3} {{
+""{log1}"" ""{log2}"" ""{log3}"" {{
     rotate 2
 }}
 ";
@@ -362,11 +362,11 @@ namespace logrotate.Tests.Integration
 compress
 daily
 
-{log1} {{
+""{log1}"" {{
     rotate 2
 }}
 
-{log2} {{
+""{log2}"" {{
     rotate 3
 }}
 ";
@@ -403,11 +403,11 @@ daily
 compress
 daily
 
-{log1} {{
+""{log1}"" {{
     rotate 2
 }}
 
-{log2} {{
+""{log2}"" {{
     rotate 3
     nocompress
 }}
@@ -558,6 +558,7 @@ daily
     notifempty
     copytruncate
     sharedscripts
+    createolddir
     olddir ""{archiveDir}""
 }}
 ";

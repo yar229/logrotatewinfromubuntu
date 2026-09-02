@@ -848,7 +848,7 @@ if (log.PreRemove != null)
         /// </summary>
         private static int CompressLogFile(string name, LogInfo log, FileStat sb)
         {
-            Log.Message(MESS.DEBUG, "compressing log with: {0}\n", log.CompressProg);
+            Log.Message(MESS.DEBUG, "compressing log with: {0}\n", string.IsNullOrEmpty(log.CompressProg) ? "internal gzip" : log.CompressProg);
             if (Debug)
                 return 0;
 
@@ -902,7 +902,7 @@ if (log.PreRemove != null)
         /// <param name="compressedFilepath">Destination compressed file path</param>
         private static int CompressWithGZipStream(string filepath, LogInfo log)
         {
-            string compressedFilepath = filepath + log.CompressExt;
+            string compressedFilepath = AddExtension(filepath, log.CompressExt);
             try
             { 
                 int chunkSize = 65536;
@@ -952,7 +952,7 @@ if (log.PreRemove != null)
                     return 1;
                 }
 
-                string compressedName = name + log.CompressExt;
+                string compressedName = AddExtension(name, log.CompressExt);
                 using (var outFile = CreateOutputFile(compressedName, sb))
                 {
                     if (outFile == null)
@@ -1011,6 +1011,14 @@ if (log.PreRemove != null)
             }
 
             return 0;
+        }
+
+        private static string AddExtension(string filepath, string extension)
+        {
+            string ext = extension.StartsWith('.')
+                ? extension
+                : $".{extension}";
+            return Path.ChangeExtension(filepath, Path.GetExtension(filepath) + ext);
         }
 
         /// <summary>
