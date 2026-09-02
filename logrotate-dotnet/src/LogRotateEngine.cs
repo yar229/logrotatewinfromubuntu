@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Xml.Linq;
 
 namespace LogRotate
 {
@@ -857,6 +858,90 @@ if (log.PreRemove != null)
                 return 1;
             }
 
+            int compressResult = 0;
+            if (string.IsNullOrEmpty(log.CompressProg))
+            {
+                compressResult = CompressWithGZipStream(name, log);
+            }
+            else
+            {
+                compressResult = CompressWithExternalCommand(name, log, sb);
+            }
+
+            
+            if (compressResult != 0)
+            {
+                return compressResult;
+            }
+
+
+
+            /* preserve timestamps of the original log */
+            try
+            {
+                File.SetLastWriteTimeUtc(name + log.CompressExt, sb.Mtime.Kind == DateTimeKind.Utc
+                    ? sb.Mtime : sb.Mtime.ToUniversalTime());
+                File.SetLastAccessTimeUtc(name + log.CompressExt, sb.Atime.Kind == DateTimeKind.Utc
+                    ? sb.Atime : sb.Atime.ToUniversalTime());
+            }
+            catch
+            {
+                /* best effort */
+            }
+
+            var afterSb = FileStat.Stat(name);
+            if (!Debug && ShredFile(name, log, afterSb) != 0)
+                return 1;
+            return 0;
+        }
+
+        /// <summary>
+        /// Compress a file using built-in .NET GZipStream
+        /// </summary>
+        /// <param name="filepath">Source file path</param>
+        /// <param name="compressedFilepath">Destination compressed file path</param>
+        private static int CompressWithGZipStream(string filepath, LogInfo log)
+        {
+            string compressedFilepath = filepath + log.CompressExt;
+            try
+            { 
+                int chunkSize = 65536;
+                using (FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    if (fs == null)
+                    {
+                        Log.Message(MESS.ERROR, "unable to open {0} ({1}) for compression: {2}\n",
+                            filepath, (log.Flags & LogFlags.Shred) != 0 ? "read-write" : "read-only",
+                            ErrnoMessage(2));
+                        return 1;
+                    }
+
+                    using (FileStream outputFs = new FileStream(compressedFilepath, FileMode.Create))
+                    using (System.IO.Compression.GZipStream zs = new System.IO.Compression.GZipStream(outputFs, System.IO.Compression.CompressionMode.Compress))
+                    {
+                        byte[] buffer = new byte[chunkSize];
+                        while (true)
+                        {
+                            int bytesRead = fs.Read(buffer, 0, chunkSize);
+                            if (bytesRead == 0)
+                                break;
+                            zs.Write(buffer, 0, bytesRead);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Message(MESS.ERROR, "cannot compress with internal gzip: {0}\n",
+                    ex.Message);
+                FileUtil.DeleteFile(compressedFilepath);
+                return 1;
+            }
+            return 0;
+        }
+
+        private static int CompressWithExternalCommand(string name, LogInfo log, FileStat sb)
+        {
             using (var inFile = OpenStream(name, false))
             {
                 if (inFile == null)
@@ -925,22 +1010,6 @@ if (log.PreRemove != null)
                 }
             }
 
-            /* preserve timestamps of the original log */
-            try
-            {
-                File.SetLastWriteTimeUtc(name + log.CompressExt, sb.Mtime.Kind == DateTimeKind.Utc
-                    ? sb.Mtime : sb.Mtime.ToUniversalTime());
-                File.SetLastAccessTimeUtc(name + log.CompressExt, sb.Atime.Kind == DateTimeKind.Utc
-                    ? sb.Atime : sb.Atime.ToUniversalTime());
-            }
-            catch
-            {
-                /* best effort */
-            }
-
-            var afterSb = FileStat.Stat(name);
-            if (!Debug && ShredFile(name, log, afterSb) != 0)
-                return 1;
             return 0;
         }
 
@@ -1448,10 +1517,9 @@ if (log.PreRemove != null)
             state.LastRotated = now;
 
             rotNames.DirName = log.OldDir != null
-                ? (log.OldDir[0] == '/' || log.OldDir[0] == '\\'
+                ? Path.GetFullPath(log.OldDir) != log.OldDir //(log.OldDir[0] == '/' || log.OldDir[0] == '\\'
                     ? log.OldDir
-                    //: string.Format(CultureInfo.InvariantCulture, "{0}/{1}", DirName(log.Files[logNum]), log.OldDir))
-                    : Path.Combine(DirName(log.Files[logNum]), log.OldDir))
+                    : Path.Combine(DirName(log.Files[logNum]), log.OldDir) //: string.Format(CultureInfo.InvariantCulture, "{0}/{1}", DirName(log.Files[logNum]), log.OldDir))
                 : DirName(log.Files[logNum]);
 
             rotNames.BaseName = BaseName(log.Files[logNum]);
@@ -1558,7 +1626,7 @@ if (log.PreRemove != null)
                 else
                 {
                     string oldName = string.Format(CultureInfo.InvariantCulture,
-                        "{0}.{2}{3}", Path.Combine(rotNames.DirName, rotNames.BaseName),
+                        "{0}.{1}{2}", Path.Combine(rotNames.DirName, rotNames.BaseName),
                         log.LogStart, fileext);
                     var sbprev = FileStat.Stat(oldName);
                     if (sbprev == null)

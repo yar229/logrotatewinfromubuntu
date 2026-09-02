@@ -1,0 +1,5 @@
+{
+  "$schema": "https://xunit.net",
+  "parallelizeAssembly": false,
+  "parallelizeTestCollections": false
+}

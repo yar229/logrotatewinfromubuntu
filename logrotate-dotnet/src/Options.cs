@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 
 namespace LogRotate
@@ -14,7 +14,7 @@ namespace LogRotate
         // PATH, mirroring the original behavior of invoking gzip/gunzip.
         public static string DefaultCompressCommand { get; } =
             Environment.GetEnvironmentVariable("LOGROTATE_COMPRESS")
-            ?? "gzip";
+            ?? ""; //"gzip";
 
         public static string DefaultUncompressCommand { get; } =
             Environment.GetEnvironmentVariable("LOGROTATE_UNCOMPRESS")

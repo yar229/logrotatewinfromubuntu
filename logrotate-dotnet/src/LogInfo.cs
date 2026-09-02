@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace LogRotate
@@ -60,7 +60,7 @@ namespace LogRotate
         public string? OldDir { get; set; }
         public Criterium Criterium = Criterium.ROT_SIZE;
         public int Weekday { get; set; }              /* used by ROT_WEEKLY only */
-        public long Threshold = 1024 * 1024;         /* default: 1 MB (ROT_SIZE) */
+        public long Threshold = 0; //me 1024 * 1024;         /* default: 1 MB (ROT_SIZE) */
         public long MaxSize { get; set; }
         public long MinSize { get; set; }
         public int RotateCount { get; set; }

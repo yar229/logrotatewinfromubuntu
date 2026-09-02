@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="logrotate-dotnet/LogRotate.csproj" />
+  <Project Path="logrotate.Tests/logrotate.Tests.csproj" />
+</Solution>

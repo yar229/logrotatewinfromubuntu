@@ -480,12 +480,12 @@ namespace LogRotate
             try
             {
                 Directory.CreateDirectory(path);
-                return false;
+                return true;
             }
             catch (Exception ex)
             {
                 Log.Message(MESS.ERROR, "error creating {0}: {1}\n", path, ex.Message);
-                return true;
+                return false;
             }
         }
 
@@ -1307,7 +1307,7 @@ namespace LogRotate
                             }
                             else if (key == "olddir")
                             {
-                                newlog.OldDir = ReadPath(configFile, lineNum, "olddir", buf, ref pos, length);
+                                newlog.OldDir = ReadPath(configFile, lineNum, "olddir", buf, ref pos, length)?.Trim('"');
                                 if (newlog.OldDir == null)
                                 {
                                     if (newlog != defConfig)
@@ -1625,9 +1625,13 @@ namespace LogRotate
                                     }
 
                                     string dirName;
-                                    if (newlog.OldDir[0] != '/' && newlog.OldDir[0] != '\\')
+
+                                    //if (newlog.OldDir[0] != '/' && newlog.OldDir[0] != '\\')
+                                    var fullPath = Path.GetFullPath(newlog.OldDir);
+                                    if (newlog.OldDir != fullPath)
                                     {
-                                        dirName = dirPath + "\\" + newlog.OldDir;
+                                        //dirName = dirPath + "\\" + newlog.OldDir;
+                                        dirName = Path.Combine(fullPath, newlog.OldDir);
                                     }
                                     else
                                     {
