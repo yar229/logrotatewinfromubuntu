@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LogRotate": {
+      "commandName": "Project",
+      "commandLineArgs": "-s c:\\1\\state.txt c:\\1\\config.conf"
+    }
+  }
+}
