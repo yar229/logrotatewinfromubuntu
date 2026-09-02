@@ -66,10 +66,9 @@ namespace logrotate.Tests.Integration
             try
             {
                 // Create state file with today's date
-                string today = DateTime.Now.ToString("yyyy-M-d");
+                string today = DateTime.Now.ToString("yyyy-M-d-h:m:s");
                 File.WriteAllLines(stateFile, new[]
                 {
-                    "# logrotate state file",
                     "logrotate state -- version 2",
                     $"\"{logFile}\" {today}"
                 });
@@ -243,10 +242,9 @@ namespace logrotate.Tests.Integration
             {
                 // Create state file with a rotation date from earlier this month
                 DateTime earlierThisMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                string thisMonthDate = earlierThisMonth.ToString("yyyy-M-d");
+                string thisMonthDate = earlierThisMonth.ToString("yyyy-M-d-h:m:s");
                 File.WriteAllLines(stateFile, new[]
                 {
-                    "# logrotate state file",
                     "logrotate state -- version 2",
                     $"\"{logFile}\" {thisMonthDate}"
                 });
@@ -323,10 +321,9 @@ namespace logrotate.Tests.Integration
             {
                 // Create state file with a rotation date from earlier this year
                 DateTime earlierThisYear = new DateTime(DateTime.Now.Year, 1, 1);
-                string thisYearDate = earlierThisYear.ToString("yyyy-M-d");
+                string thisYearDate = earlierThisYear.ToString("yyyy-M-d-h:m:s");
                 File.WriteAllLines(stateFile, new[]
                 {
-                    "# logrotate state file",
                     "logrotate state -- version 2",
                     $"\"{logFile}\" {thisYearDate}"
                 });

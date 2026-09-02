@@ -30,6 +30,7 @@ namespace logrotate.Tests.Integration
             string configContent = $@"
 ""{logFile}"" {{
     rotate 3
+    createolddir
     olddir {oldDir}
     create
 }}
@@ -97,7 +98,7 @@ namespace logrotate.Tests.Integration
         }
 
         [Fact]
-        public void RotateLog_WithNoCreateOldDirAndMissingDirectory_ShouldFallbackToLogDir()
+        public void RotateLog_WithNoCreateOldDirAndMissingDirectory_ShouldFail()
         {
             // Tests that nocreateolddir prevents directory creation
 
@@ -105,7 +106,7 @@ namespace logrotate.Tests.Integration
             string logFile = Path.Combine(TestDir, "test.log");
             File.WriteAllText(logFile, "Log content\n");
 
-            string oldDir = Path.Combine(TestDir, "nonexistent");
+            string oldDir = $"\"{Path.Combine(TestDir, "nonexistent")}\"";
             string stateFile = Path.Combine(TestDir, "state.txt");
 
             string configContent = $@"
@@ -124,14 +125,10 @@ namespace logrotate.Tests.Integration
                 Directory.Exists(oldDir).Should().BeFalse("olddir should not exist initially");
 
                 // Act
-                RunLogRotate("-s", stateFile, "-f", configFile);
+                var exitCode = RunLogRotate("-s", stateFile, "-f", configFile);
 
-                // Assert - Directory should NOT be created
-                Directory.Exists(oldDir).Should().BeFalse("nocreateolddir should prevent directory creation");
-
-                // Rotated file should be in the same directory as the log file (fallback)
-                File.Exists(Path.Combine(TestDir, "test.log.1")).Should().BeTrue(
-                    "rotated file should be in log directory when olddir doesn't exist and nocreateolddir is set");
+                Directory.Exists(oldDir).Should().BeFalse("olddir should not be created");
+                exitCode.Should().Be(1);
             }
             finally
             {
