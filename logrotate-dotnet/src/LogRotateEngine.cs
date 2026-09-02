@@ -1013,13 +1013,18 @@ if (log.PreRemove != null)
             return 0;
         }
 
-        private static string AddExtension(string filepath, string extension)
+        private static string AddExtension(string filepath, string extension) 
+            => Path.ChangeExtension(filepath, Path.GetExtension(filepath) + AddDotToExtension(extension));
+
+        private static string AddDotToExtension(string extension)
         {
-            string ext = extension.StartsWith('.')
-                ? extension
-                : $".{extension}";
-            return Path.ChangeExtension(filepath, Path.GetExtension(filepath) + ext);
+            if (string.IsNullOrEmpty(extension))
+                return extension;
+            return extension.StartsWith('.')
+                        ? extension
+                        : $".{extension}";
         }
+
 
         /// <summary>
         /// Port of mailLog(): optionally decompress into a pipe feeding the mail
@@ -1518,7 +1523,7 @@ if (log.PreRemove != null)
                             + "extension is not set\n", log.Files[logNum]);
                     return 1;
                 }
-                compext = log.CompressExt;
+                compext = AddDotToExtension(log.CompressExt);
             }
 
             var now = RotatedTime.FromDateTime(_now);
@@ -1539,14 +1544,14 @@ if (log.PreRemove != null)
                     rotNames.BaseName = rotNames.BaseName.Substring(0,
                         rotNames.BaseName.Length - log.AddExtension.Length);
                 }
-                fileext = log.AddExtension;
+                fileext = AddDotToExtension(log.AddExtension);
             }
 
             if (log.Extension != null)
             {
                 if (rotNames.BaseName.EndsWith(log.Extension, StringComparison.Ordinal))
                 {
-                    fileext = log.Extension;
+                    fileext = AddDotToExtension(log.Extension);
                     rotNames.BaseName = rotNames.BaseName.Substring(0,
                         rotNames.BaseName.Length - log.Extension.Length);
                 }
@@ -1783,7 +1788,7 @@ if (log.PreRemove != null)
             {
                 rotNames.FinalName = string.Format(CultureInfo.InvariantCulture,
                     "{0}{1}{2}", Path.Combine(rotNames.DirName, rotNames.BaseName), dextStr, fileext);
-                string destFile = rotNames.FinalName + compext;
+                string destFile = AddExtension(rotNames.FinalName, compext);
                 if (File.Exists(destFile))
                 {
                     Log.Message(MESS.ERROR,
