@@ -38,5 +38,5 @@ internal class XLogFile : XBaseFile
     }
 
     public override string ToString() 
-        => $"\"{Filepath}\"";
+        => $"{Filepath}";
 }

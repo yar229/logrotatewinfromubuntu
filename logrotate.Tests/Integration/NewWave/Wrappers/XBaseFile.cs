@@ -80,5 +80,5 @@ internal abstract class XBaseFile
         => stateFile.ToString();
 
     public override string ToString()
-        => $"\"{Filepath}\"";
+        => $"{Filepath}";
 }

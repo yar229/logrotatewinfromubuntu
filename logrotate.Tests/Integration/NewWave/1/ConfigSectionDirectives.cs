@@ -80,4 +80,7 @@ public static class ConfigSectionDirectives
     public const string LogfileOpenRetry = "logfileopen_retry";
     public const string LogfileOpenMsBetweenRetryAttempts = "logfileopen_msbetweenretryattempts";
     public const string LogfileOpenNumRetryAttempts = "logfileopen_numretryattempts";
+
+    //custom non-standart directives
+    public const string MailCmd = "mailcmd";
 }

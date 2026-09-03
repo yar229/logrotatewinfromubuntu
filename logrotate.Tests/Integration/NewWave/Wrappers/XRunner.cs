@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,12 +22,22 @@ internal class XRunner
 
     public XStateFile State = new XStateFile();
 
+    public bool DoForce { get; internal set; }
+
+    internal XRunner WithForce(bool doForce = true)
+    {
+        DoForce = doForce;
+        return this;
+    }
+
     public XRunner Run()
     {
         _container.Output.WriteLine($"Config:\r\n {File.ReadAllText(Config.Filepath)}");
         _container.Output.WriteLine($"Files before run:\r\n {ListDirectory(TestHelpersGarbage.TestDirMy)}");
 
-        _container.RunLogRotate("-s", State, Config);
+        _container.RunLogRotate(
+            DoForce ? "-f" : string.Empty,
+            "--verbose", "-s", State, Config);
 
         _container.Output.WriteLine($"Files after run:\r\n {ListDirectory(TestHelpersGarbage.TestDirMy)}");
         return this;
@@ -79,4 +90,6 @@ internal class XRunner
 
         return sb.ToString();
     }
+
+
 }
