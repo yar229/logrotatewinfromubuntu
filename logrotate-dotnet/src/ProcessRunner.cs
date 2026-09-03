@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace LogRotate
 {
@@ -86,28 +87,91 @@ namespace LogRotate
         /// <summary>
         /// Runs a shell script via cmd.exe on Windows (sh -c equivalent).
         /// </summary>
-        //public static int RunScript(string script, string logFn, string? logRotFn)
+        public static int RunScript(string script, string logFilename, string? logRotatedFilename)
+        {
+            // don't want to create temp cmd file cause of sideeffects, insufficient rights, etc.
+            // so replace %1, %2, ... with actual values ourselves,
+            // since stdin cmd does not expand positional params.
+            script = ReplacePositionalArgsInScript(script, logFilename, logRotatedFilename);
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            // On Windows, cmd.exe has no direct positional args in the way
+            // /bin/sh does, so we export the filenames as env vars.
+            psi.Environment["LOGROTATE_LOG"] = logFilename;
+            if (logRotatedFilename != null)
+                psi.Environment["LOGROTATE_LOGROTATED"] = logRotatedFilename;
+
+            try
+            {
+                using (var process = Process.Start(psi))
+                {
+                    using (var sw = process.StandardInput)
+                        if (sw.BaseStream.CanWrite)
+                            sw.WriteLine(script);
+
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+
+                    process.WaitForExit();
+
+                    Console.WriteLine("Output:\n" + output);
+                    if (!string.IsNullOrEmpty(error))
+                        Console.WriteLine("Error:\n" + error);
+
+                    return process.ExitCode;
+                }
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return -1;
+            }
+        }
+
+        private static readonly Regex ParamPattern = new(@"%(\d+)", RegexOptions.Compiled);
+        private static string ReplacePositionalArgsInScript(string script, params string[] args)
+            => ParamPattern.Replace(script, m =>
+            {
+                int idx = int.Parse(m.Groups[1].Value) - 1;
+                if (idx >= 0 && idx < args.Length)
+                    return args[idx].Replace("\"", "\"\"");
+                return m.Value; // leave unresolved %N as-is
+            });
+
+
+        ///// <summary>
+        ///// Runs a shell script via cmd.exe on Windows (sh -c equivalent).
+        ///// </summary>
+        //public static int RunScript(string script, string logFilename, string? logRotatedFilename)
         //{
         //    var psi = new ProcessStartInfo
         //    {
         //        FileName = Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
         //        UseShellExecute = false,
         //        RedirectStandardError = false,
-        //        RedirectStandardOutput = false,
+        //        RedirectStandardOutput = true,
         //        CreateNoWindow = false,
         //    };
 
         //    // On Windows, cmd.exe has no direct positional args in the way
         //    // /bin/sh does, so we export the filenames as env vars.
-        //    psi.Environment["LOGROTATE_LOG"] = logFn;
-        //    if (logRotFn != null)
-        //        psi.Environment["LOGROTATE_LOGROTATED"] = logRotFn;
+        //    psi.Environment["LOGROTATE_LOG"] = logFilename;
+        //    if (logRotatedFilename != null)
+        //        psi.Environment["LOGROTATE_LOGROTATED"] = logRotatedFilename;
 
         //    psi.ArgumentList.Add("/d");
         //    psi.ArgumentList.Add("/s");
         //    psi.ArgumentList.Add("/c");
-        //    script = script.Replace("\n", " ^\n");
-        //    psi.ArgumentList.Add($"\"{script}\"\r\n");
+        //    //script = script.Replace("\n", " ^\n");
+        //    //psi.ArgumentList.Add($"\"{script}\"\r\n");
 
         //    try
         //    {
@@ -121,52 +185,53 @@ namespace LogRotate
         //    }
         //}
 
-        public static int RunScript(string script, string logFn, string? logRotFn)
-        {
-            string temp_path_orig = Path.GetTempFileName();
-            string temp_path = Path.ChangeExtension(temp_path_orig, "cmd");
-            File.Delete(temp_path_orig);
-            try
-            {
-                File.WriteAllText(temp_path, script);
-            }
-            catch (Exception e)
-            {
-                return 1;
-            }
+        // from logrotatewin
+        //public static int RunScript(string script, string logFn, string? logRotFn)
+        //{
+        //    string temp_path_orig = Path.GetTempFileName();
+        //    string temp_path = Path.ChangeExtension(temp_path_orig, "cmd");
+        //    File.Delete(temp_path_orig);
+        //    try
+        //    {
+        //        File.WriteAllText(temp_path, script);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return 1;
+        //    }
 
 
-            var psi = new ProcessStartInfo(Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
-                "/S /C \"\"" + temp_path + "\" \"" + logFn + "\"\"")
-            {
-                UseShellExecute = false,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false,
-                CreateNoWindow = false,
-            };
+        //    var psi = new ProcessStartInfo(Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
+        //        "/S /C \"\"" + temp_path + "\" \"" + logFn + "\"\"")
+        //    {
+        //        UseShellExecute = false,
+        //        RedirectStandardError = false,
+        //        RedirectStandardOutput = false,
+        //        CreateNoWindow = false,
+        //    };
 
-            // On Windows, cmd.exe has no direct positional args in the way
-            // /bin/sh does, so we export the filenames as env vars.
-            psi.Environment["LOGROTATE_LOG"] = logFn;
-            if (logRotFn != null)
-                psi.Environment["LOGROTATE_LOGROTATED"] = logRotFn;
+        //    // On Windows, cmd.exe has no direct positional args in the way
+        //    // /bin/sh does, so we export the filenames as env vars.
+        //    psi.Environment["LOGROTATE_LOG"] = logFn;
+        //    if (logRotFn != null)
+        //        psi.Environment["LOGROTATE_LOGROTATED"] = logRotFn;
 
-            //psi.ArgumentList.Add("/d");
-            //psi.ArgumentList.Add("/s");
-            //psi.ArgumentList.Add("/c");
-            //script = script.Replace("\n", " ^\n");
-            //psi.ArgumentList.Add($"\"{script}\"\r\n");
+        //    //psi.ArgumentList.Add("/d");
+        //    //psi.ArgumentList.Add("/s");
+        //    //psi.ArgumentList.Add("/c");
+        //    //script = script.Replace("\n", " ^\n");
+        //    //psi.ArgumentList.Add($"\"{script}\"\r\n");
 
-            try
-            {
-                using var proc = Process.Start(psi)!;
-                proc.WaitForExit();
-                return proc.ExitCode;
-            }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                return -1;
-            }
-        }
+        //    try
+        //    {
+        //        using var proc = Process.Start(psi)!;
+        //        proc.WaitForExit();
+        //        return proc.ExitCode;
+        //    }
+        //    catch (System.ComponentModel.Win32Exception)
+        //    {
+        //        return -1;
+        //    }
+        //}
     }
 }
