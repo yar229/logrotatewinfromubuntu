@@ -394,6 +394,7 @@ namespace LogRotate
             to.First = from.First;
             to.Last = from.Last;
             to.PreRemove = from.PreRemove;
+            to.MailCmd = from.MailCmd;
             to.LogAddress = from.LogAddress;
             to.Extension = from.Extension;
             to.AddExtension = from.AddExtension;
@@ -436,6 +437,7 @@ namespace LogRotate
             target.First = copy.First;
             target.Last = copy.Last;
             target.PreRemove = copy.PreRemove;
+            target.MailCmd = copy.MailCmd;
             target.LogAddress = copy.LogAddress;
             target.Extension = copy.Extension;
             target.AddExtension = copy.AddExtension;
@@ -1174,6 +1176,13 @@ namespace LogRotate
                                 scriptDest = "preremove";
                                 state = STATE_LOAD_SCRIPT;
                             }
+                            else if (key == "mailcmd")
+                            {
+                                newlog.MailCmd = null;
+                                scriptStart = pos;
+                                scriptDest = "mailcmd";
+                                state = STATE_LOAD_SCRIPT;
+                            }
                             else if (key == "tabooext")
                             {
                                 if (newlog != defConfig)
@@ -1766,6 +1775,7 @@ namespace LogRotate
                                     case "post": newlog.Post = script; break;
                                     case "last": newlog.Last = script; break;
                                     case "preremove": newlog.PreRemove = script; break;
+                                    case "mailcmd": newlog.MailCmd = script; break;
                                 }
                                 scriptDest = null;
                                 scriptStart = -1;
@@ -1793,7 +1803,7 @@ namespace LogRotate
                             if (key == null)
                                 continue;
                             if (key == "postrotate" || key == "prerotate" || key == "firstaction"
-                                || key == "lastaction" || key == "preremove")
+                                || key == "lastaction" || key == "preremove" || key == "mailcmd")
                             {
                                 state = STATE_LOAD_SCRIPT | STATE_SKIP_CONFIG;
                             }

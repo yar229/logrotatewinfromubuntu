@@ -72,6 +72,7 @@ namespace LogRotate
         public string? First { get; set; }
         public string? Last { get; set; }
         public string? PreRemove { get; set; }
+        public string? MailCmd { get; set; }
         public string? LogAddress { get; set; }
         public string? Extension { get; set; }
         public string? AddExtension { get; set; }

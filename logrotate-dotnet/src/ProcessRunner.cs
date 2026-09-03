@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace LogRotate
 {
@@ -84,154 +87,170 @@ namespace LogRotate
             return result;
         }
 
-        /// <summary>
-        /// Runs a shell script via cmd.exe on Windows (sh -c equivalent).
-        /// </summary>
-        public static int RunScript(string script, string logFilename, string? logRotatedFilename)
-        {
-            // don't want to create temp cmd file cause of sideeffects, insufficient rights, etc.
-            // so replace %1, %2, ... with actual values ourselves,
-            // since stdin cmd does not expand positional params.
-            script = ReplacePositionalArgsInScript(script, logFilename, logRotatedFilename);
 
-            var psi = new ProcessStartInfo
-            {
-                FileName = Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            // On Windows, cmd.exe has no direct positional args in the way
-            // /bin/sh does, so we export the filenames as env vars.
-            psi.Environment["LOGROTATE_LOG"] = logFilename;
-            if (logRotatedFilename != null)
-                psi.Environment["LOGROTATE_LOGROTATED"] = logRotatedFilename;
-
-            try
-            {
-                using (var process = Process.Start(psi))
-                {
-                    using (var sw = process.StandardInput)
-                        if (sw.BaseStream.CanWrite)
-                            sw.WriteLine(script);
-
-                    string output = process.StandardOutput.ReadToEnd();
-                    string error = process.StandardError.ReadToEnd();
-
-                    process.WaitForExit();
-
-                    Console.WriteLine("Output:\n" + output);
-                    if (!string.IsNullOrEmpty(error))
-                        Console.WriteLine("Error:\n" + error);
-
-                    return process.ExitCode;
-                }
-            }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                return -1;
-            }
-        }
-
-        private static readonly Regex ParamPattern = new(@"%(\d+)", RegexOptions.Compiled);
-        private static string ReplacePositionalArgsInScript(string script, params string[] args)
-            => ParamPattern.Replace(script, m =>
-            {
-                int idx = int.Parse(m.Groups[1].Value) - 1;
-                if (idx >= 0 && idx < args.Length)
-                    return args[idx].Replace("\"", "\"\"");
-                return m.Value; // leave unresolved %N as-is
-            });
-
-
-        ///// <summary>
-        ///// Runs a shell script via cmd.exe on Windows (sh -c equivalent).
-        ///// </summary>
-        //public static int RunScript(string script, string logFilename, string? logRotatedFilename)
+        //public static int RunScript(string script, string logFilename, string? logRotatedFilename,
+        //    params KeyValuePair<string, string>[] additionalParams)
         //{
-        //    var psi = new ProcessStartInfo
+        //    var args = new List<KeyValuePair<string, string>>(additionalParams.Length + 2);
+        //    args.Add(new KeyValuePair<string, string>("LOGROTATE_LOG", logFilename));
+        //    args.Add(new KeyValuePair<string, string>("LOGROTATE_LOGROTATED", logRotatedFilename));
+        //    args.AddRange(additionalParams);
+
+        //    string tempScriptFilepath = string.Empty;
+        //    try
         //    {
-        //        FileName = Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
+        //        string temp_path_orig = Path.GetTempFileName();
+        //        tempScriptFilepath = Path.ChangeExtension(temp_path_orig, "cmd");
+        //        File.Delete(temp_path_orig);
+
+        //        File.WriteAllText(tempScriptFilepath, script);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Message(MESS.ERROR, "cannot create temp script file {0}: {1}\n", tempScriptFilepath, ex.Message);
+        //        return 1;
+        //    }
+
+        //    string cmd = Environment.GetEnvironmentVariable("COMSPEC")
+        //            ?? Path.Combine(Environment.SystemDirectory, "cmd.exe");
+
+        //    var cmdargs = new StringBuilder();
+        //    {
+        //        cmdargs.Append("/S /C ");
+        //        cmdargs.Append("\"");
+        //        {
+        //            cmdargs.Append("\"" + tempScriptFilepath + "\" ");
+        //            foreach (var arg in args)
+        //                cmdargs.Append("\"" + (arg.Value ?? string.Empty) + "\" ");
+        //        }
+        //        cmdargs.Append("\"");
+        //    }
+
+        //    var psi = new ProcessStartInfo(cmd, cmdargs.ToString())
+        //    {
         //        UseShellExecute = false,
-        //        RedirectStandardError = false,
+        //        RedirectStandardError = true,
         //        RedirectStandardOutput = true,
         //        CreateNoWindow = false,
         //    };
 
-        //    // On Windows, cmd.exe has no direct positional args in the way
-        //    // /bin/sh does, so we export the filenames as env vars.
-        //    psi.Environment["LOGROTATE_LOG"] = logFilename;
-        //    if (logRotatedFilename != null)
-        //        psi.Environment["LOGROTATE_LOGROTATED"] = logRotatedFilename;
+        //    foreach (var arg in args)
+        //    {
+        //        if (!string.IsNullOrWhiteSpace(arg.Key))
+        //            psi.Environment[arg.Key] = arg.Value;
+        //    }
 
-        //    psi.ArgumentList.Add("/d");
-        //    psi.ArgumentList.Add("/s");
-        //    psi.ArgumentList.Add("/c");
-        //    //script = script.Replace("\n", " ^\n");
-        //    //psi.ArgumentList.Add($"\"{script}\"\r\n");
-
+        //    var result = new ProcessResult();
         //    try
         //    {
         //        using var proc = Process.Start(psi)!;
+
+        //        var outputTask = proc.StandardOutput.ReadToEndAsync();
+        //        var errorTask = proc.StandardError.ReadToEndAsync();
+        //        Task.WaitAll(outputTask, errorTask);
+        //        result.StdOut = outputTask.Result;
+        //        result.StdErr = errorTask.Result;
+
         //        proc.WaitForExit();
-        //        return proc.ExitCode;
+        //        result.ExitCode = proc.ExitCode;
+
+        //        if (!string.IsNullOrEmpty(result.StdOut))
+        //            Log.Message(MESS.DEBUG, "process execution STDOUT log: {0}\n", result.StdOut);
+        //        if (!string.IsNullOrEmpty(result.StdErr))
+        //            Log.Message(MESS.ERROR, "process execution STDERR log: {0}\n", result.StdErr);
         //    }
-        //    catch (System.ComponentModel.Win32Exception)
+        //    catch (System.ComponentModel.Win32Exception ex)
         //    {
-        //        return -1;
+        //        result.ExitCode = -1;
+        //        result.StdErr = ex.Message;
         //    }
+        //    return result.ExitCode;
         //}
 
-        // from logrotatewin
-        //public static int RunScript(string script, string logFn, string? logRotFn)
-        //{
-        //    string temp_path_orig = Path.GetTempFileName();
-        //    string temp_path = Path.ChangeExtension(temp_path_orig, "cmd");
-        //    File.Delete(temp_path_orig);
-        //    try
-        //    {
-        //        File.WriteAllText(temp_path, script);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return 1;
-        //    }
 
 
-        //    var psi = new ProcessStartInfo(Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe",
-        //        "/S /C \"\"" + temp_path + "\" \"" + logFn + "\"\"")
-        //    {
-        //        UseShellExecute = false,
-        //        RedirectStandardError = false,
-        //        RedirectStandardOutput = false,
-        //        CreateNoWindow = false,
-        //    };
 
-        //    // On Windows, cmd.exe has no direct positional args in the way
-        //    // /bin/sh does, so we export the filenames as env vars.
-        //    psi.Environment["LOGROTATE_LOG"] = logFn;
-        //    if (logRotFn != null)
-        //        psi.Environment["LOGROTATE_LOGROTATED"] = logRotFn;
 
-        //    //psi.ArgumentList.Add("/d");
-        //    //psi.ArgumentList.Add("/s");
-        //    //psi.ArgumentList.Add("/c");
-        //    //script = script.Replace("\n", " ^\n");
-        //    //psi.ArgumentList.Add($"\"{script}\"\r\n");
 
-        //    try
-        //    {
-        //        using var proc = Process.Start(psi)!;
-        //        proc.WaitForExit();
-        //        return proc.ExitCode;
-        //    }
-        //    catch (System.ComponentModel.Win32Exception)
-        //    {
-        //        return -1;
-        //    }
-        //}
+
+        public static int RunScript(string script, string logFilename, string? logRotatedFilename,
+            params (string EnvVar, string Value)[] additionalParams)
+        {
+            var args = new List<(string EnvVar, string Value)>(additionalParams.Length + 2);
+            args.Add(new ("LOGROTATE_LOG", logFilename));
+            args.Add(new ("LOGROTATE_LOGROTATED", logRotatedFilename));
+            args.AddRange(additionalParams);
+
+            string tempScriptFilepath = string.Empty;
+            try
+            {
+                string temp_path_orig = Path.GetTempFileName();
+                tempScriptFilepath = Path.ChangeExtension(temp_path_orig, "cmd");
+                File.Delete(temp_path_orig);
+
+                File.WriteAllText(tempScriptFilepath, script);
+            }
+            catch (Exception ex)
+            {
+                Log.Message(MESS.ERROR, "cannot create temp script file {0}: {1}\n", tempScriptFilepath, ex.Message);
+                return 1;
+            }
+
+            string cmd = Environment.GetEnvironmentVariable("COMSPEC")
+                    ?? Path.Combine(Environment.SystemDirectory, "cmd.exe");
+
+            var cmdargs = new StringBuilder();
+            {
+                cmdargs.Append("/S /C ");
+                cmdargs.Append("\"");
+                {
+                    cmdargs.Append("\"" + tempScriptFilepath + "\" ");
+                    foreach (var arg in args)
+                        cmdargs.Append("\"" + (arg.Value ?? string.Empty) + "\" ");
+                }
+                cmdargs.Append("\"");
+            }
+
+            var psi = new ProcessStartInfo(cmd, cmdargs.ToString())
+            {
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = false,
+            };
+
+            foreach (var arg in args)
+            {
+                if (!string.IsNullOrWhiteSpace(arg.EnvVar))
+                    psi.Environment[arg.EnvVar] = arg.Value;
+            }
+
+            var result = new ProcessResult();
+            try
+            {
+                using var proc = Process.Start(psi)!;
+
+                var outputTask = proc.StandardOutput.ReadToEndAsync();
+                var errorTask = proc.StandardError.ReadToEndAsync();
+                Task.WaitAll(outputTask, errorTask);
+                result.StdOut = outputTask.Result;
+                result.StdErr = errorTask.Result;
+
+                proc.WaitForExit();
+                result.ExitCode = proc.ExitCode;
+
+                if (!string.IsNullOrEmpty(result.StdOut))
+                    Log.Message(MESS.DEBUG, "process execution STDOUT log: {0}\n", result.StdOut);
+                if (!string.IsNullOrEmpty(result.StdErr))
+                    Log.Message(MESS.ERROR, "process execution STDERR log: {0}\n", result.StdErr);
+            }
+            catch (System.ComponentModel.Win32Exception ex)
+            {
+                result.ExitCode = -1;
+                result.StdErr = ex.Message;
+            }
+            return result.ExitCode;
+        }
+
     }
 }
