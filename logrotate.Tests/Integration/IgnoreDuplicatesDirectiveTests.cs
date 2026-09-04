@@ -26,13 +26,13 @@ namespace logrotate.Tests.Integration
             string wildcard2 = Path.Combine(TestDir, "test.*");
 
             string configContent = $@"
-{wildcard1} {{
+""{wildcard1}"" {{
     ignoreduplicates
     rotate 3
     create
 }}
 
-{wildcard2} {{
+""{wildcard2}"" {{
     ignoreduplicates
     rotate 5
     create
@@ -69,12 +69,12 @@ namespace logrotate.Tests.Integration
             string wildcard2 = Path.Combine(TestDir, "test.*");
 
             string configContent = $@"
-{wildcard1} {{
+""{wildcard1}"" {{
     rotate 3
     create
 }}
 
-{wildcard2} {{
+""{wildcard2}"" {{
     rotate 3
     create
 }}
@@ -111,13 +111,13 @@ namespace logrotate.Tests.Integration
             string stateFile = Path.Combine(TestDir, "state.txt");
             string wildcard = Path.Combine(TestDir, "*.log");
             string configContent = $@"
-{wildcard} {{
+""{wildcard}"" {{
     ignoreduplicates
     rotate 3
     create
 }}
 
-{wildcard} {{
+""{wildcard}"" {{
     ignoreduplicates
     rotate 3
     create
@@ -161,19 +161,19 @@ namespace logrotate.Tests.Integration
             string wildcard3 = Path.Combine(TestDir, "*.log");
 
             string configContent = $@"
-{wildcard1} {{
+""{wildcard1}"" {{
     ignoreduplicates
     rotate 3
     create
 }}
 
-{wildcard2} {{
+""{wildcard2}"" {{
     ignoreduplicates
     rotate 3
     create
 }}
 
-{wildcard3} {{
+""{wildcard3}"" {{
     ignoreduplicates
     rotate 3
     create
@@ -212,12 +212,12 @@ namespace logrotate.Tests.Integration
             string configContent = $@"
 ignoreduplicates
 
-{wildcard1} {{
+""{wildcard1}"" {{
     rotate 3
     create
 }}
 
-{wildcard2} {{
+""{wildcard2}"" {{
     rotate 3
     create
 }}
@@ -285,13 +285,13 @@ ignoreduplicates
             string wildcard2 = Path.Combine(TestDir, "test.*");
 
             string configContent = $@"
-{wildcard1} {{
+""{wildcard1}"" {{
     ignoreduplicates
     rotate 2
     create
 }}
 
-{wildcard2} {{
+""{wildcard2}"" {{
     ignoreduplicates
     rotate 10
     compress
