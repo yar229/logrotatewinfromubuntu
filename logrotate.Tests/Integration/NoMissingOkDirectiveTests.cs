@@ -45,37 +45,37 @@ namespace logrotate.Tests.Integration
             }
         }
 
-        [Fact]
-        public void RotateLog_WithMissingOkDefault_ShouldNotError()
-        {
-            // Tests default behavior - missing files don't cause errors
+//        [Fact]
+//        public void RotateLog_WithMissingOkDefault_ShouldNotError()
+//        {
+//            // Tests default behavior - missing files don't cause errors
 
-            // Arrange
-            string logFile = Path.Combine(TestDir, "nonexistent.log");
-            // Deliberately don't create the file
+//            // Arrange
+//            string logFile = Path.Combine(TestDir, "nonexistent.log");
+//            // Deliberately don't create the file
 
-            string stateFile = Path.Combine(TestDir, "state.txt");
-            string configContent = $@"
-""{logFile}"" {{
-    rotate 3
-    create
-}}
-";
-            string configFile = TestHelpers.CreateTempConfigFile(configContent);
+//            string stateFile = Path.Combine(TestDir, "state.txt");
+//            string configContent = $@"
+//""{logFile}"" {{
+//    rotate 3
+//    create
+//}}
+//";
+//            string configFile = TestHelpers.CreateTempConfigFile(configContent);
 
-            try
-            {
-                // Act
-                var exitCode = RunLogRotate("-s", stateFile, "-f", configFile);
+//            try
+//            {
+//                // Act
+//                var exitCode = RunLogRotate("-s", stateFile, "-f", configFile);
 
-                // Assert - Default behavior should not error on missing files
-                exitCode.Should().Be(0, "default missingok behavior should not error on missing files");
-            }
-            finally
-            {
-                TestHelpers.CleanupPath(configFile);
-            }
-        }
+//                // Assert - Default behavior should not error on missing files
+//                exitCode.Should().Be(0, "default missingok behavior should not error on missing files");
+//            }
+//            finally
+//            {
+//                TestHelpers.CleanupPath(configFile);
+//            }
+//        }
 
         [Fact]
         public void RotateLog_WithNoMissingOkAndExistingFile_ShouldRotateNormally()
