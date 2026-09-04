@@ -350,8 +350,8 @@ namespace logrotate.Tests.Integration
             string stateFile = Path.Combine(TestDir, "state.txt");
             string configContent = $@"
 ""{logFile}"" {{
-    daily
     rotate 2
+    daily
 }}
 ";
             string configFile = TestHelpers.CreateTempConfigFile(configContent);

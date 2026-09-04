@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -27,6 +28,13 @@ internal abstract class XBaseFile
         File.WriteAllText(Filepath, string.IsNullOrEmpty(_content) 
             ? $"content of {Filename}" 
             : _content);
+
+        if (CreationTime != null)
+            File.SetCreationTime(Filepath, CreationTime.Value);
+
+        if (LastWriteTime != null)
+            File.SetLastWriteTime(Filepath, LastWriteTime.Value);
+
         return this;
     }
 
@@ -40,6 +48,20 @@ internal abstract class XBaseFile
     public XBaseFile WithContent(string content)
     {
         _content = content;
+        return this;
+    }
+
+    public DateTime? LastWriteTime { get; private set; }
+    public XBaseFile WithLastWriteTime(DateTime dateTime)
+    {
+        LastWriteTime = dateTime;
+        return this;
+    }
+
+    public DateTime? CreationTime { get; private set; }
+    public XBaseFile WithCreationTime(DateTime dateTime)
+    {
+        CreationTime = dateTime;
         return this;
     }
 
