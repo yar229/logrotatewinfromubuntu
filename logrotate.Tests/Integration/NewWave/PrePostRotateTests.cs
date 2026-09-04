@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Op = logrotate.Config.ConfigSectionDirectives;
+using Op = LogRotate.Consts.ConfigSectionDirectives;
 
 namespace logrotate.Tests.Integration.GarbageTests;
 

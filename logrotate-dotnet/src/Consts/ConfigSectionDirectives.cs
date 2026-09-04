@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace logrotate.Config;
+namespace LogRotate.Consts;
 
 public static class ConfigSectionDirectives
 {
@@ -61,13 +61,6 @@ public static class ConfigSectionDirectives
     public const string Size = "size";
     public const string MailFirst = "mailfirst";
     public const string MailLast = "maillast";
-    public const string SmtpServer = "smtpserver";
-    public const string SmtpPort = "smtpport";
-    public const string SmtpSsl = "smtpssl";
-    public const string NoSmtpSsl = "nosmtpssl";
-    public const string SmtpUser = "smtpuser";
-    public const string SmtpFrom = "smtpfrom";
-    public const string SmtpUserPwd = "smtpuserpwd";
     public const string DateExt = "dateext";
     public const string NoDateExt = "nodateext";
     public const string DateYesterday = "dateyesterday";
@@ -77,9 +70,18 @@ public static class ConfigSectionDirectives
     public const string TabooExt = "tabooext";
     public const string TabooPat = "taboopat";
     public const string Include = "include";
-    public const string LogfileOpenRetry = "logfileopen_retry";
-    public const string LogfileOpenMsBetweenRetryAttempts = "logfileopen_msbetweenretryattempts";
-    public const string LogfileOpenNumRetryAttempts = "logfileopen_numretryattempts";
+
+    //added in logrotatewin
+    //public const string LogfileOpenRetry = "logfileopen_retry";
+    //public const string LogfileOpenMsBetweenRetryAttempts = "logfileopen_msbetweenretryattempts";
+    //public const string LogfileOpenNumRetryAttempts = "logfileopen_numretryattempts";
+
+    //removed in logrotatewin
+    public const string AllowHardlink = "allowhardlink";
+    public const string NoAllowHardlink = "noallowhardlink";
+    public const string Su = "su";
+    public const string Errors = "errors";
+
 
     //custom non-standart directives
     public const string MailCmd = "mailcmd";

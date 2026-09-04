@@ -20,5 +20,9 @@
     <ProjectReference Include="..\logrotate-dotnet\LogRotate.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Integration\NewWave\1\" />
+  </ItemGroup>
+
 
 </Project>

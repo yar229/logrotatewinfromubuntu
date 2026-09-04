@@ -1,8 +1,10 @@
-﻿using System;
+﻿using LogRotate.Consts;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Op = LogRotate.Consts.ConfigSectionDirectives;
 
 namespace LogRotate
 {
@@ -53,12 +55,12 @@ namespace LogRotate
         {
             switch (crit)
             {
-                case Criterium.ROT_HOURLY: return "hourly";
-                case Criterium.ROT_DAYS: return "daily";
-                case Criterium.ROT_WEEKLY: return "weekly";
-                case Criterium.ROT_MONTHLY: return "monthly";
-                case Criterium.ROT_YEARLY: return "yearly";
-                case Criterium.ROT_SIZE: return "size";
+                case Criterium.ROT_HOURLY: return Op.Hourly;
+                case Criterium.ROT_DAYS: return Op.Daily;
+                case Criterium.ROT_WEEKLY: return Op.Weekly;
+                case Criterium.ROT_MONTHLY: return Op.Monthly;
+                case Criterium.ROT_YEARLY: return Op.Yearly;
+                case Criterium.ROT_SIZE: return Op.Size;
                 default: return "XXX";
             }
         }
@@ -181,7 +183,7 @@ namespace LogRotate
         private static bool ReadModeUidGid(string configFile, int lineNum, string directive,
                                            string value, ref long mode, ref long uid, ref long gid)
         {
-            bool isSu = directive == "su";
+            bool isSu = directive == Op.Su;
             int i = 0;
             var vals = new string[3];
             int p = 0;
@@ -738,46 +740,46 @@ namespace LogRotate
                                 goto error;
                             }
 
-                            if (key == "compress") newlog.Flags |= LogFlags.Compress;
-                            else if (key == "nocompress") newlog.Flags &= ~LogFlags.Compress;
-                            else if (key == "delaycompress") newlog.Flags |= LogFlags.DelayCompress;
-                            else if (key == "nodelaycompress") newlog.Flags &= ~LogFlags.DelayCompress;
-                            else if (key == "shred") newlog.Flags |= LogFlags.Shred;
-                            else if (key == "noshred") newlog.Flags &= ~LogFlags.Shred;
-                            else if (key == "allowhardlink") newlog.Flags |= LogFlags.AllowHardLink;
-                            else if (key == "noallowhardlink") newlog.Flags &= ~LogFlags.AllowHardLink;
-                            else if (key == "sharedscripts") newlog.Flags |= LogFlags.SharedScripts;
-                            else if (key == "nosharedscripts") newlog.Flags &= ~LogFlags.SharedScripts;
-                            else if (key == "copytruncate")
+                            if (key == Op.Compress) newlog.Flags |= LogFlags.Compress;
+                            else if (key == Op.NoCompress) newlog.Flags &= ~LogFlags.Compress;
+                            else if (key == Op.DelayCompress) newlog.Flags |= LogFlags.DelayCompress;
+                            else if (key == Op.NoDelayCompress) newlog.Flags &= ~LogFlags.DelayCompress;
+                            else if (key == Op.Shred) newlog.Flags |= LogFlags.Shred;
+                            else if (key == Op.NoShred) newlog.Flags &= ~LogFlags.Shred;
+                            else if (key == Op.AllowHardlink) newlog.Flags |= LogFlags.AllowHardLink;
+                            else if (key == Op.NoAllowHardlink) newlog.Flags &= ~LogFlags.AllowHardLink;
+                            else if (key == Op.SharedScripts) newlog.Flags |= LogFlags.SharedScripts;
+                            else if (key == Op.NoSharedScripts) newlog.Flags &= ~LogFlags.SharedScripts;
+                            else if (key == Op.CopyTruncate)
                             {
                                 newlog.Flags |= LogFlags.CopyTruncate;
                                 newlog.Flags &= ~LogFlags.TmpFilename;
                             }
-                            else if (key == "nocopytruncate") newlog.Flags &= ~LogFlags.CopyTruncate;
-                            else if (key == "renamecopy")
+                            else if (key == Op.NoCopyTruncate) newlog.Flags &= ~LogFlags.CopyTruncate;
+                            else if (key == Op.RenameCopy)
                             {
                                 newlog.Flags |= LogFlags.TmpFilename;
                                 newlog.Flags &= ~LogFlags.CopyTruncate;
                             }
-                            else if (key == "norenamecopy") newlog.Flags &= ~LogFlags.TmpFilename;
-                            else if (key == "copy") newlog.Flags |= LogFlags.Copy;
-                            else if (key == "nocopy") newlog.Flags &= ~LogFlags.Copy;
-                            else if (key == "ifempty") newlog.Flags |= LogFlags.IfEmpty;
-                            else if (key == "notifempty") newlog.Flags &= ~LogFlags.IfEmpty;
-                            else if (key == "dateext") newlog.Flags |= LogFlags.DateExt;
-                            else if (key == "nodateext") newlog.Flags &= ~LogFlags.DateExt;
-                            else if (key == "dateyesterday") newlog.Flags |= LogFlags.DateYesterday;
-                            else if (key == "nodateyesterday") newlog.Flags &= ~LogFlags.DateYesterday;
-                            else if (key == "datehourago") newlog.Flags |= LogFlags.DateHourAgo;
-                            else if (key == "nodatehourago") newlog.Flags &= ~LogFlags.DateHourAgo;
-                            else if (key == "dateformat")
+                            else if (key == Op.NoRenameCopy) newlog.Flags &= ~LogFlags.TmpFilename;
+                            else if (key == Op.Copy) newlog.Flags |= LogFlags.Copy;
+                            else if (key == Op.NoCopy) newlog.Flags &= ~LogFlags.Copy;
+                            else if (key == Op.IfEmpty) newlog.Flags |= LogFlags.IfEmpty;
+                            else if (key == Op.NotIfEmpty) newlog.Flags &= ~LogFlags.IfEmpty;
+                            else if (key == Op.DateExt) newlog.Flags |= LogFlags.DateExt;
+                            else if (key == Op.NoDateExt) newlog.Flags &= ~LogFlags.DateExt;
+                            else if (key == Op.DateYesterday) newlog.Flags |= LogFlags.DateYesterday;
+                            else if (key == Op.NoDateYesterday) newlog.Flags &= ~LogFlags.DateYesterday;
+                            else if (key == Op.DateHourAgo) newlog.Flags |= LogFlags.DateHourAgo;
+                            else if (key == Op.NoDateHourAgo) newlog.Flags &= ~LogFlags.DateHourAgo;
+                            else if (key == Op.DateFormat)
                             {
                                 newlog.DateFormat = IsolateValue(configFile, lineNum, key, buf, ref pos, length);
                             }
-                            else if (key == "noolddir") newlog.OldDir = null;
-                            else if (key == "mailfirst") newlog.Flags |= LogFlags.MailFirst;
-                            else if (key == "maillast") newlog.Flags &= ~LogFlags.MailFirst;
-                            else if (key == "su")
+                            else if (key == Op.NoOldDir) newlog.OldDir = null;
+                            else if (key == Op.MailFirst) newlog.Flags |= LogFlags.MailFirst;
+                            else if (key == Op.MailLast) newlog.Flags &= ~LogFlags.MailFirst;
+                            else if (key == Op.Su)
                             {
                                 key = IsolateLine(buf, ref pos, length);
                                 if (key == null)
@@ -793,7 +795,7 @@ namespace LogRotate
                                     goto error;
                                 }
                                 long tmpMode = Sentinel.NO_MODE;
-                                bool err = ReadModeUidGid(configFile, lineNum, "su", key,
+                                bool err = ReadModeUidGid(configFile, lineNum, Op.Su, key,
                                     ref tmpMode, ref newlog.SuUid, ref newlog.SuGid);
                                 if (err)
                                 {
@@ -839,13 +841,13 @@ namespace LogRotate
                                 }
                                 newlog.Flags |= LogFlags.Su;
                             }
-                            else if (key == "create")
+                            else if (key == Op.Create)
                             {
                                 key = IsolateLine(buf, ref pos, length);
                                 if (key == null)
                                     continue;
 
-                                bool err = ReadModeUidGid(configFile, lineNum, "create", key,
+                                bool err = ReadModeUidGid(configFile, lineNum, Op.Create, key,
                                     ref newlog.CreateMode, ref newlog.CreateUid, ref newlog.CreateGid);
                                 if (err)
                                 {
@@ -858,13 +860,13 @@ namespace LogRotate
                                 }
                                 newlog.Flags |= LogFlags.Create;
                             }
-                            else if (key == "createolddir")
+                            else if (key == Op.CreateOldDir)
                             {
                                 key = IsolateLine(buf, ref pos, length);
                                 if (key == null)
                                     continue;
 
-                                bool err = ReadModeUidGid(configFile, lineNum, "createolddir", key,
+                                bool err = ReadModeUidGid(configFile, lineNum, Op.CreateOldDir, key,
                                     ref newlog.OlddirMode, ref newlog.OlddirUid, ref newlog.OlddirGid);
                                 if (newlog.OlddirMode == Sentinel.NO_MODE)
                                     newlog.OlddirMode = 0x1ED; // 0755
@@ -881,9 +883,9 @@ namespace LogRotate
 
                                 newlog.Flags |= LogFlags.OldDirCreate;
                             }
-                            else if (key == "nocreateolddir") newlog.Flags &= ~LogFlags.OldDirCreate;
-                            else if (key == "nocreate") newlog.Flags &= ~LogFlags.Create;
-                            else if (key == "size" || key == "minsize" || key == "maxsize")
+                            else if (key == Op.NoCreateOldDir) newlog.Flags &= ~LogFlags.OldDirCreate;
+                            else if (key == Op.NoCreate) newlog.Flags &= ~LogFlags.Create;
+                            else if (key == Op.Size || key == Op.MinSize || key == Op.MaxSize)
                             {
                                 string opt = key;
                                 key = IsolateValue(configFile, lineNum, opt, buf, ref pos, length);
@@ -950,7 +952,7 @@ namespace LogRotate
                                     }
                                 }
                             }
-                            else if (key == "shredcycles")
+                            else if (key == Op.ShredCycles)
                             {
                                 key = IsolateValue(configFile, lineNum, "shred cycles", buf, ref pos, length);
                                 if (key == null)
@@ -975,20 +977,20 @@ namespace LogRotate
                                 }
                                 newlog.ShredCycles = (int)sc;
                             }
-                            else if (key == "hourly")
+                            else if (key == Op.Hourly)
                             {
                                 SetCriterium(ref newlog.Criterium, Criterium.ROT_HOURLY, ref criteriumSet);
                             }
-                            else if (key == "daily")
+                            else if (key == Op.Daily)
                             {
                                 SetCriterium(ref newlog.Criterium, Criterium.ROT_DAYS, ref criteriumSet);
                                 newlog.Threshold = 1;
                             }
-                            else if (key == "monthly")
+                            else if (key == Op.Monthly)
                             {
                                 SetCriterium(ref newlog.Criterium, Criterium.ROT_MONTHLY, ref criteriumSet);
                             }
-                            else if (key == "weekly")
+                            else if (key == Op.Weekly)
                             {
                                 SetCriterium(ref newlog.Criterium, Criterium.ROT_WEEKLY, ref criteriumSet);
                                 key = IsolateLine(buf, ref pos, length);
@@ -1009,11 +1011,11 @@ namespace LogRotate
                                     configFile, lineNum, key);
                                 goto error;
                             }
-                            else if (key == "yearly")
+                            else if (key == Op.Yearly)
                             {
                                 SetCriterium(ref newlog.Criterium, Criterium.ROT_YEARLY, ref criteriumSet);
                             }
-                            else if (key == "rotate")
+                            else if (key == Op.Rotate)
                             {
                                 key = IsolateValue(configFile, lineNum, "rotate count", buf, ref pos, length);
                                 if (key == null)
@@ -1043,7 +1045,7 @@ namespace LogRotate
                                     rcValue = -1;
                                 newlog.RotateCount = (int)rcValue;
                             }
-                            else if (key == "start")
+                            else if (key == Op.Start)
                             {
                                 key = IsolateValue(configFile, lineNum, "start count", buf, ref pos, length);
                                 if (key == null)
@@ -1068,7 +1070,7 @@ namespace LogRotate
                                 }
                                 newlog.LogStart = (int)sc2;
                             }
-                            else if (key == "minage")
+                            else if (key == Op.MinAge)
                             {
                                 key = IsolateValue(configFile, lineNum, "minage count", buf, ref pos, length);
                                 if (key == null)
@@ -1093,7 +1095,7 @@ namespace LogRotate
                                 }
                                 newlog.RotateMinAge = (int)ma;
                             }
-                            else if (key == "maxage")
+                            else if (key == Op.MaxAge)
                             {
                                 key = IsolateValue(configFile, lineNum, "maxage count", buf, ref pos, length);
                                 if (key == null)
@@ -1118,13 +1120,13 @@ namespace LogRotate
                                 }
                                 newlog.RotateAge = (int)ma2;
                             }
-                            else if (key == "errors")
+                            else if (key == Op.Errors)
                             {
                                 Log.Message(MESS.WARN,
                                     "{0}: {1}: the errors directive is deprecated and no longer used.\n",
                                     configFile, lineNum);
                             }
-                            else if (key == "mail")
+                            else if (key == Op.Mail)
                             {
                                 newlog.LogAddress = ReadAddress(configFile, lineNum, "mail", buf, ref pos, length);
                                 if (newlog.LogAddress == null)
@@ -1137,53 +1139,53 @@ namespace LogRotate
                                     goto error;
                                 }
                             }
-                            else if (key == "nomail") newlog.LogAddress = null;
-                            else if (key == "missingok") newlog.Flags |= LogFlags.MissingOk;
-                            else if (key == "nomissingok") newlog.Flags &= ~LogFlags.MissingOk;
-                            else if (key == "ignoreduplicates") newlog.Flags |= LogFlags.IgnoreDuplicates;
-                            else if (key == "prerotate")
+                            else if (key == Op.NoMail) newlog.LogAddress = null;
+                            else if (key == Op.MissingOk) newlog.Flags |= LogFlags.MissingOk;
+                            else if (key == Op.NoMissingOk) newlog.Flags &= ~LogFlags.MissingOk;
+                            else if (key == Op.IgnoreDuplicates) newlog.Flags |= LogFlags.IgnoreDuplicates;
+                            else if (key == Op.PreRotate)
                             {
                                 newlog.Pre = null;
                                 scriptStart = pos;
-                                scriptDest = "pre";
+                                scriptDest = Op.PreRotate;
                                 state = STATE_LOAD_SCRIPT;
                             }
-                            else if (key == "firstaction")
+                            else if (key == Op.FirstAction)
                             {
                                 newlog.First = null;
                                 scriptStart = pos;
-                                scriptDest = "first";
+                                scriptDest = Op.FirstAction;
                                 state = STATE_LOAD_SCRIPT;
                             }
-                            else if (key == "postrotate")
+                            else if (key == Op.PostRotate)
                             {
                                 newlog.Post = null;
                                 scriptStart = pos;
-                                scriptDest = "post";
+                                scriptDest = Op.PostRotate;
                                 state = STATE_LOAD_SCRIPT;
                             }
-                            else if (key == "lastaction")
+                            else if (key == Op.LastAction)
                             {
                                 newlog.Last = null;
                                 scriptStart = pos;
-                                scriptDest = "last";
+                                scriptDest = Op.LastAction;
                                 state = STATE_LOAD_SCRIPT;
                             }
-                            else if (key == "preremove")
+                            else if (key == Op.Preremove)
                             {
                                 newlog.PreRemove = null;
                                 scriptStart = pos;
-                                scriptDest = "preremove";
+                                scriptDest = Op.Preremove;
                                 state = STATE_LOAD_SCRIPT;
                             }
-                            else if (key == "mailcmd")
+                            else if (key == Op.MailCmd)
                             {
                                 newlog.MailCmd = null;
                                 scriptStart = pos;
-                                scriptDest = "mailcmd";
+                                scriptDest = Op.MailCmd;
                                 state = STATE_LOAD_SCRIPT;
                             }
-                            else if (key == "tabooext")
+                            else if (key == Op.TabooExt)
                             {
                                 if (newlog != defConfig)
                                 {
@@ -1228,7 +1230,7 @@ namespace LogRotate
                                         endtag++;
                                 }
                             }
-                            else if (key == "taboopat")
+                            else if (key == Op.TabooPat)
                             {
                                 if (newlog != defConfig)
                                 {
@@ -1274,7 +1276,7 @@ namespace LogRotate
                                         endtag++;
                                 }
                             }
-                            else if (key == "include")
+                            else if (key == Op.Include)
                             {
                                 key = IsolateValue(configFile, lineNum, "include", buf, ref pos, length);
                                 if (key == null)
@@ -1316,7 +1318,7 @@ namespace LogRotate
                                     continue;
                                 }
                             }
-                            else if (key == "olddir")
+                            else if (key == Op.OldDir)
                             {
                                 newlog.OldDir = ReadPath(configFile, lineNum, "olddir", buf, ref pos, length)?.Trim('"');
                                 if (newlog.OldDir == null)
@@ -1343,7 +1345,7 @@ namespace LogRotate
 
                                 Log.Message(MESS.DEBUG, "olddir is now {0}\n", newlog.OldDir);
                             }
-                            else if (key == "extension")
+                            else if (key == Op.Extension)
                             {
                                 key = IsolateValue(configFile, lineNum, "extension name", buf, ref pos, length);
                                 if (key == null)
@@ -1359,7 +1361,7 @@ namespace LogRotate
                                 key = null;
                                 Log.Message(MESS.DEBUG, "extension is now {0}\n", newlog.Extension);
                             }
-                            else if (key == "addextension")
+                            else if (key == Op.AddExtension)
                             {
                                 key = IsolateValue(configFile, lineNum, "addextension name", buf, ref pos, length);
                                 if (key == null)
@@ -1375,7 +1377,7 @@ namespace LogRotate
                                 key = null;
                                 Log.Message(MESS.DEBUG, "addextension is now {0}\n", newlog.AddExtension);
                             }
-                            else if (key == "compresscmd")
+                            else if (key == Op.CompressCmd)
                             {
                                 newlog.CompressProg = null;
                                 newlog.CompressProg = ReadPath(configFile, lineNum, "compress", buf, ref pos, length);
@@ -1401,7 +1403,7 @@ namespace LogRotate
                                     }
                                 }
                             }
-                            else if (key == "uncompresscmd")
+                            else if (key == Op.UncompressCmd)
                             {
                                 newlog.UncompressProg = null;
                                 newlog.UncompressProg = ReadPath(configFile, lineNum, "uncompress", buf, ref pos, length);
@@ -1416,7 +1418,7 @@ namespace LogRotate
                                 }
                                 Log.Message(MESS.DEBUG, "uncompress_prog is now {0}\n", newlog.UncompressProg);
                             }
-                            else if (key == "compressoptions")
+                            else if (key == Op.CompressOptions)
                             {
                                 newlog.CompressOptions.Clear();
                                 string? options = IsolateLine(buf, ref pos, length);
@@ -1445,7 +1447,7 @@ namespace LogRotate
                                 newlog.CompressOptions.AddRange(parsed);
                                 Log.Message(MESS.DEBUG, "compress_options is now {0}\n", options);
                             }
-                            else if (key == "compressext")
+                            else if (key == Op.CompressExt)
                             {
                                 newlog.CompressExt = null;
                                 newlog.CompressExt = ReadPath(configFile, lineNum, "compress-ext", buf, ref pos, length);
@@ -1770,12 +1772,12 @@ namespace LogRotate
                                 string script = buf.Substring(scriptStart, endtag - scriptStart);
                                 switch (scriptDest)
                                 {
-                                    case "pre": newlog.Pre = script; break;
-                                    case "first": newlog.First = script; break;
-                                    case "post": newlog.Post = script; break;
-                                    case "last": newlog.Last = script; break;
-                                    case "preremove": newlog.PreRemove = script; break;
-                                    case "mailcmd": newlog.MailCmd = script; break;
+                                    case Op.PreRotate: newlog.Pre = script; break;
+                                    case Op.FirstAction: newlog.First = script; break;
+                                    case Op.PostRotate: newlog.Post = script; break;
+                                    case Op.LastAction: newlog.Last = script; break;
+                                    case Op.Preremove: newlog.PreRemove = script; break;
+                                    case Op.MailCmd: newlog.MailCmd = script; break;
                                 }
                                 scriptDest = null;
                                 scriptStart = -1;
@@ -1802,8 +1804,8 @@ namespace LogRotate
                             key = IsolateWord(buf, ref pos, length);
                             if (key == null)
                                 continue;
-                            if (key == "postrotate" || key == "prerotate" || key == "firstaction"
-                                || key == "lastaction" || key == "preremove" || key == "mailcmd")
+                            if (key == Op.PostRotate || key == Op.PreRotate || key == Op.FirstAction
+                                || key == Op.LastAction || key == Op.Preremove || key == Op.MailCmd)
                             {
                                 state = STATE_LOAD_SCRIPT | STATE_SKIP_CONFIG;
                             }
