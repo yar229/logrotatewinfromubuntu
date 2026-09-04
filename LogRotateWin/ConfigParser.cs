@@ -1001,7 +1001,7 @@ namespace LogRotate
                                     continue;
                                 }
 
-                                if (int.TryParse(key, NumberStyles.None, CultureInfo.InvariantCulture, out int weekday)
+                                if (int.TryParse(key.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out int weekday)
                                     && weekday <= 7)
                                 {
                                     newlog.Weekday = weekday;
