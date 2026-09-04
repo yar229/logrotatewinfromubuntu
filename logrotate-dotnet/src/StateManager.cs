@@ -142,13 +142,13 @@ namespace LogRotate
             // minute/second zeroed, wday from current time.
             st.LastRotated = new RotatedTime
             {
-                Year = now.Year - 1901, //me
-                Mon = now.Month - 1,
-                MDay = now.Day,
-                Hour = now.Hour,
+                Year = 0, //now.Year - 1900, //me
+                Mon = 0, //now.Month - 1,
+                MDay = 0, //now.Day,
+                Hour = 0, //now.Hour,
                 Min = 0,
                 Sec = 0,
-                WDay = (int)now.DayOfWeek,
+                WDay = 0, //(int)now.DayOfWeek,
                 IsDst = -1,
             };
             _states[idx].Add(st);
