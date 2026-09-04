@@ -126,6 +126,7 @@ namespace LogRotate
             return FindStateImpl(fn, _states.Count);
         }
 
+        private static readonly DateTime DateTimeMinValue1900 = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private LogState FindStateImpl(string fn, int size)
         {
             int idx = HashIndex(fn, size);
@@ -137,20 +138,24 @@ namespace LogRotate
 
             Log.Message(MESS.DEBUG, "Creating new state\n");
             var st = new LogState { Fn = fn };
-            var now = CurrentTime;
-            // port of newState(): lastRotated initialized to now (hour/mday/mon/year),
-            // minute/second zeroed, wday from current time.
-            st.LastRotated = new RotatedTime
-            {
-                Year = 0, //now.Year - 1900, //me
-                Mon = 0, //now.Month - 1,
-                MDay = 0, //now.Day,
-                Hour = 0, //now.Hour,
-                Min = 0,
-                Sec = 0,
-                WDay = 0, //(int)now.DayOfWeek,
-                IsDst = -1,
-            };
+
+            st.LastRotated = RotatedTime.FromDateTime(DateTimeMinValue1900);
+            //orig
+            //var now = CurrentTime;
+            //// port of newState(): lastRotated initialized to now (hour/mday/mon/year),
+            //// minute/second zeroed, wday from current time.
+            //st.LastRotated = new RotatedTime()
+            //{
+            //    Year = now.Year - 1900, 
+            //    Mon = now.Month - 1,
+            //    MDay = now.Day,
+            //    Hour = now.Hour,
+            //    Min = 0,
+            //    Sec = 0,
+            //    WDay = (int)now.DayOfWeek,
+            //    IsDst = -1,
+            //};
+
             _states[idx].Add(st);
             return st;
         }

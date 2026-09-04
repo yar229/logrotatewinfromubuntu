@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -125,14 +125,15 @@ namespace LogRotate
                 ? (isDir ? 0xA000 | 0x4000 : 0xA000 | 0x8000)
                 : (isDir ? 0x4000 | 0x1A4 : 0x8000 | 0x1A4);
 
+            var fi = new FileInfo(path);
             return new FileStat
             {
                 Mode = mode,
                 Size = isDir ? 0 : (File.Exists(path) ? new FileInfo(path).Length : 0),
-                Uid = 0, Gid = 0, Nlink = 1,
-                Atime = DateTime.UtcNow,
-                Mtime = DateTime.UtcNow,
-                Ctime = DateTime.UtcNow,
+                Uid = 0, Gid = 0, Nlink = 1,//me maybe isLink ? 1 : 0
+                Atime = fi.LastAccessTime,  //me DateTime.UtcNow,
+                Mtime = fi.LastWriteTime,   //DateTime.UtcNow,
+                Ctime = fi.CreationTime,    // DateTime.UtcNow,
                 DeviceInfo = null,
             };
         }
