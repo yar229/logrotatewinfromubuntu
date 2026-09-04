@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
+namespace logrotate.Tests.Integration.NewWave.Wrappers;
 
 internal class XConfig
 {

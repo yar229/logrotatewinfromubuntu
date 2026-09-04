@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
 
-namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
+namespace logrotate.Tests.Integration.NewWave.Wrappers;
 
 internal class XFile: XBaseFile
 {

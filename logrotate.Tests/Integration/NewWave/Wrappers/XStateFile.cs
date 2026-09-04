@@ -1,9 +1,10 @@
-﻿using System;
+﻿using logrotate.Tests.Integration.NewWave.Base;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
+namespace logrotate.Tests.Integration.NewWave.Wrappers;
 
 internal class XStateFile
 {
@@ -34,7 +35,7 @@ internal class XStateFile
 
     public XStateFile WithProcessed(string filepath, DateTime datetime)
     {
-        filepath = TestHelpersGarbage.Quote(filepath);
+        filepath = TestHelpersNewWave.Quote(filepath);
 
         _processed.Add($"{filepath} {DateTime.Now.ToString("yyyy-M-d-h:m:s")}");
         return this;

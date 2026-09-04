@@ -1,15 +1,10 @@
-﻿using FluentAssertions;
-using logrotate.Tests.Integration.GarbageTests.Wrappers;
-using logrotate.Tests.Integration.NewWave.Base;
-using LogRotate;
-using System.CodeDom;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+﻿using logrotate.Tests.Integration.NewWave.Base;
+using logrotate.Tests.Integration.NewWave.Wrappers;
 using Xunit;
 using Xunit.Abstractions;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
-namespace logrotate.Tests.Integration.GarbageTests;
+namespace logrotate.Tests.Integration.NewWave;
 
 [Trait("Category", "Integration")]
 public class MailTests : NewWaveIntegrationTestBase
@@ -30,7 +25,7 @@ public class MailTests : NewWaveIntegrationTestBase
         Runner
             .WithLog(log, l => l
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFile(markerMail, l => l
                 .ShouldBe()
                 .ShouldContain(DefaultEmail)
@@ -55,7 +50,7 @@ public class MailTests : NewWaveIntegrationTestBase
         Runner
             .WithLog(log, l => l
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFile(markerMail, l => l
                 .ShouldBe()
                 .ShouldContain(DefaultEmail)

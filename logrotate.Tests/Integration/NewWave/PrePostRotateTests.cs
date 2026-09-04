@@ -1,17 +1,10 @@
-﻿using FluentAssertions;
-using logrotate.Tests.Integration.GarbageTests.Wrappers;
-using logrotate.Tests.Integration.NewWave.Base;
-using LogRotate;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
-using System.CodeDom;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using logrotate.Tests.Integration.NewWave.Base;
+using logrotate.Tests.Integration.NewWave.Wrappers;
 using Xunit;
 using Xunit.Abstractions;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
-namespace logrotate.Tests.Integration.GarbageTests;
+namespace logrotate.Tests.Integration.NewWave;
 
 [Trait("Category", "Integration")]
 public class PrePostRotateTests : NewWaveIntegrationTestBase
@@ -30,7 +23,7 @@ public class PrePostRotateTests : NewWaveIntegrationTestBase
         Runner
             .WithLog("log-a.log", l => l.Create()
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFiles([markerPre, markerPost], l => l
                 .ShouldBe())
             .WithConfig(c => c
@@ -53,7 +46,7 @@ public class PrePostRotateTests : NewWaveIntegrationTestBase
         Runner
             .WithLog(log, l => l
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFiles([markerPre, markerPost], l => l
                 .ShouldBe()
                 .ShouldContain(XPattern.AllLogs)
@@ -80,7 +73,7 @@ public class PrePostRotateTests : NewWaveIntegrationTestBase
         Runner
             .WithLogs([logA, logB], l => l
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFiles([markerPre, markerPost], l => l
                 .ShouldBe()
                 .ShouldContain(logA, logB))
@@ -106,7 +99,7 @@ public class PrePostRotateTests : NewWaveIntegrationTestBase
         Runner
             .WithLogs([logA, logB], l => l
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFiles([markerPre, markerPost], l => l
                 .ShouldBe()
                 .ShouldContain(pattern)
@@ -152,7 +145,7 @@ public class PrePostRotateTests : NewWaveIntegrationTestBase
         Runner
             .WithLog(log, l => l
                 .ShouldBe()
-                .ShouldNotBe(".1"))
+                .ShouldNotBe(Ext(".1")))
             .WithFiles([markerPre, markerPost], l => l
                 .ShouldNotBe())
             .WithState(s => s

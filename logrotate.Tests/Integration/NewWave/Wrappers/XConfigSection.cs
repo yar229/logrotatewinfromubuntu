@@ -1,11 +1,9 @@
-﻿using System;
+﻿using logrotate.Tests.Integration.NewWave.Base;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xunit;
-using static System.Collections.Specialized.BitVector32;
 
-namespace logrotate.Tests.Integration.GarbageTests.Wrappers
+namespace logrotate.Tests.Integration.NewWave.Wrappers
 {
     internal class XConfigSection
     {
@@ -74,7 +72,7 @@ namespace logrotate.Tests.Integration.GarbageTests.Wrappers
                 return sb.ToString();
             }
 
-            sb.AppendLine(string.Join(" ", _filePatterns.Select(fp => TestHelpersGarbage.Quote(fp))) + " {");
+            sb.AppendLine(string.Join(" ", _filePatterns.Select(fp => TestHelpersNewWave.Quote(fp))) + " {");
             foreach (var str in _directives)
                 sb.AppendLine($"\t{str}");
             sb.Append("}");

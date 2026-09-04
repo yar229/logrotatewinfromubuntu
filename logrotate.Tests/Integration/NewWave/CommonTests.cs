@@ -1,16 +1,10 @@
-﻿using FluentAssertions;
-using logrotate.Tests.Integration.GarbageTests.Wrappers;
-using logrotate.Tests.Integration.NewWave.Base;
-using LogRotate;
-using System.CodeDom;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using logrotate.Tests.Integration.NewWave.Base;
+using logrotate.Tests.Integration.NewWave.Wrappers;
 using Xunit;
 using Xunit.Abstractions;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
-namespace logrotate.Tests.Integration.GarbageTests;
+namespace logrotate.Tests.Integration.NewWave;
 
 [Trait("Category", "Integration")]
 public class CommonTests : NewWaveIntegrationTestBase
@@ -26,9 +20,9 @@ public class CommonTests : NewWaveIntegrationTestBase
         Runner
             .WithLog("log-a.log", s => s.Create()
                 .ShouldNotBe()
-                .ShouldBe(".1") )
+                .ShouldBe(Ext(".1")) )
             .WithConfig(c => c
-                .WithSection([XPattern.AllLogs], s => s
+                .WithSection(XPattern.AllLogs, s => s
                     .With(Op.Rotate, 2)
                     .With(Op.Monthly))
                 .Create() )
@@ -44,10 +38,10 @@ public class CommonTests : NewWaveIntegrationTestBase
         Runner
             .WithLog(logA, l => l
                 .ShouldNotBe()
-                .ShouldBe(".1") )
+                .ShouldBe(Ext(".1")) )
             .WithLog(logB, l => l
                 .ShouldBe()
-                .ShouldNotBe(".1") )
+                .ShouldNotBe(Ext(".1")) )
             .WithState(s => s
                 .WithProcessed(logB)
                 .Create())
@@ -59,18 +53,36 @@ public class CommonTests : NewWaveIntegrationTestBase
             .RunAndCheck();
     }
 
-    [Fact]
+    [Fact(DisplayName = "simple log by wildcard should be rotated")]
     public void SimpleLogRotateByMask_ShoudBeRotated()
     {
         Runner
             .WithLog("log-a.log", l => l.Create()
                 .ShouldNotBe()
-                .ShouldBe(".1") )
+                .ShouldBe(Ext(".1")) )
             .WithConfig(c => c
-                .WithSection([XPattern.AllLogs], s => s
+                .WithSection(XPattern.AllLogs, s => s
                     .With(Op.Rotate, 2)
                     .With(Op.Monthly))
                 .Create() )
+            .RunAndCheck();
+    }
+
+    [Fact(DisplayName = "minage should prevents rotation of files younger than specified days")]
+    public void RotateLog_WithMinAge1AndNewFile_ShouldNotRotate()
+    {
+        Runner
+            .WithLog(l => l
+                .WithContent("Fresh log content")
+                .Create()
+                .ShouldBe("original file should remain")
+                .ShouldNotBe(Ext(".1"), $"file younger than {Op.MinAge} should not be rotated"))
+            .WithConfig(c => c
+                .WithSection(XPattern.AllLogs, s => s
+                    .With(Op.MinAge, 1)
+                    .With(Op.Rotate, 3)
+                    .With(Op.Create))
+                .Create())
             .RunAndCheck();
     }
 }

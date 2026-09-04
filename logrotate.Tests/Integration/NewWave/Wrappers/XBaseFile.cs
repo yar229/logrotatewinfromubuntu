@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-//using System.Runtime.Remoting.Contexts;
+using System.Linq;
 
-namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
+namespace logrotate.Tests.Integration.NewWave.Wrappers;
 
 internal abstract class XBaseFile
 {
@@ -23,6 +22,14 @@ internal abstract class XBaseFile
         => Path.Combine(_testDir, Filename);
 
 
+    public XBaseFile Create()
+    {
+        File.WriteAllText(Filepath, string.IsNullOrEmpty(_content) 
+            ? $"content of {Filename}" 
+            : _content);
+        return this;
+    }
+
     public bool Exists()
         => File.Exists(Filepath);
 
@@ -37,33 +44,56 @@ internal abstract class XBaseFile
     }
 
     #region ShouldBe ========================================================================
-    public readonly List<string> ShouldBeList = new();
+    public readonly List<KeyValuePair<string, string>> ShouldBeList = new();
  
 
-    public XBaseFile ShouldBe(params string[] postfixes)
+    public XBaseFile ShouldBe(XExtension[] postfixes, string message)
     {
         if (null == postfixes || postfixes.Length == 0)
         {
-            ShouldBeList.Add(string.Empty);
+            ShouldBeList.Add(new KeyValuePair<string, string>(string.Empty, message));
             return this;
         }
 
-        ShouldBeList.AddRange(postfixes);
+        ShouldBeList.AddRange(postfixes.Select(p => new KeyValuePair<string, string>(p.Ext, message)));
         return this;
     }
 
-    public List<string> ShouldNotBeList = new();
-    public XBaseFile ShouldNotBe(params string[] postfixes)
+    public XBaseFile ShouldBe(XExtension postfix, string message) 
+        => ShouldBe([postfix], message);
+
+    public XBaseFile ShouldBe(params XExtension[] postfixes) 
+        => ShouldBe(postfixes, string.Empty);
+
+    public XBaseFile ShouldBe(string message)
+        => ShouldBe([], message);
+    
+
+    public readonly List<KeyValuePair<string, string>> ShouldNotBeList = new();
+    public XBaseFile ShouldNotBe(XExtension[] postfixes, string message)
     {
         if (null == postfixes || postfixes.Length == 0)
-        {    
-            ShouldNotBeList.Add(string.Empty);
+        {
+            ShouldNotBeList.Add(new KeyValuePair<string, string>(string.Empty, message));
             return this;
         }
-        ShouldNotBeList.AddRange(postfixes);
+
+        ShouldNotBeList.AddRange(postfixes.Select(p => new KeyValuePair<string, string>(p.Ext, message)));
         return this;
     }
 
+    public XBaseFile ShouldNotBe(XExtension postfix, string message)
+        => ShouldNotBe([postfix], message);
+
+    public XBaseFile ShouldNotBe(params XExtension[] postfixes)
+        => ShouldNotBe(postfixes, string.Empty);
+
+    public XBaseFile ShouldNotBe(string message)
+        => ShouldNotBe([], message);
+
+    #endregion ShouldBe =====================================================================
+
+    #region ShouldContain ===================================================================
     public List<string> ShouldNotContainList = new();
     public XBaseFile ShouldNotContain(params string[] values)
     {
@@ -77,8 +107,8 @@ internal abstract class XBaseFile
         ShouldContainList.AddRange(values);
         return this;
     }
-    #endregion ShouldBe =====================================================================
 
+    #endregion ShouldContain ================================================================
 
 
 

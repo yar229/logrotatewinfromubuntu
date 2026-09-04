@@ -1,4 +1,4 @@
-﻿using logrotate.Tests.Integration.GarbageTests.Wrappers;
+﻿using logrotate.Tests.Integration.NewWave.Wrappers;
 using Xunit.Abstractions;
 
 namespace logrotate.Tests.Integration.NewWave.Base;
@@ -14,4 +14,7 @@ public abstract class NewWaveIntegrationTestBase : IntegrationTestBase, INewWave
         Output = output;
         Runner = new XRunner(this);
     }
+
+    protected XExtension Ext(string ext) 
+        => new XExtension(ext);
 }

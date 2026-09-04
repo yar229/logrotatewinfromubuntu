@@ -3,12 +3,11 @@ using logrotate.Tests.Integration.NewWave.Base;
 using LogRotate;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
+namespace logrotate.Tests.Integration.NewWave.Wrappers;
 
 internal class XRunner
 {
@@ -48,12 +47,23 @@ internal class XRunner
     }
     public XRunner Check()
     {
+        string reason;
         foreach (var file in Files)
         {
             foreach (var postfix in file.ShouldBeList)
-                file.Exists(postfix).Should().BeTrue($"{file.Type} must exists: {file.Filename}{postfix}");
+            {
+                reason = string.IsNullOrEmpty(postfix.Value)
+                    ? string.Empty
+                    : $"(reason: {postfix.Value})\r\n";
+                file.Exists(postfix.Key).Should().BeTrue($"\r\n{file.Type} must exists: {file.Filename}{postfix.Key}\r\n{reason}");
+            }
             foreach (var postfix in file.ShouldNotBeList)
-                file.Exists(postfix).Should().BeFalse($"{file.Type} must NOT exists: {file.Filename}{postfix}");
+            {
+                reason = string.IsNullOrEmpty(postfix.Value)
+                    ? string.Empty
+                    : $"(reason: {postfix.Value})\r\n";
+                file.Exists(postfix.Key).Should().BeFalse($"\r\n{file.Type} must NOT exists: {file.Filename}{postfix.Key}\r\n{reason}");
+            }
 
             if (file.ShouldContainList.Any())
             {
@@ -97,6 +107,9 @@ internal class XRunner
 
     public XRunner WithLogs(IEnumerable<XLogFile> logs, Action<XLogFile> init)
     {
+        if (!logs.Any())
+            throw new ArgumentException($"{nameof(logs)} must be not empty {nameof(XRunner)}.{nameof(WithLogs)}");
+
         foreach (var log in logs)
         {
             if (null != init)
@@ -117,11 +130,13 @@ internal class XRunner
     public XRunner WithLog(XLogFile log, Action<XLogFile> init)
         => WithLogs([log], init);
 
+    public XRunner WithLog(Action<XLogFile> init)
+        => WithLog(NewLog() , init);
 
 
     public XRunner WithState(string filename, Action<XStateFile> init)
     {
-        var state = new XStateFile(_container.TestDir, filename);
+        var state = NewState(filename);
         if (null != init)
             init(state);
         State = state;
@@ -145,7 +160,7 @@ internal class XRunner
 
     public XRunner WithFiles(IEnumerable<string> filenames, Action<XFile> init)
         => WithFiles(
-            filenames.Select(fn => new XFile(_container.TestDir, fn)),
+            filenames.Select(fn => NewFile(fn)),
             init);
 
     public XRunner WithFile(string filename, Action<XFile> init)
@@ -180,6 +195,9 @@ internal class XRunner
 
     public XLogFile NewLog(string logname) 
         => new XLogFile(_container.TestDir, logname);
+
+    public XLogFile NewLog()
+        => NewLog(string.Empty);
 
     public XFile NewFile(string logname)
         => new XFile(_container.TestDir, logname);

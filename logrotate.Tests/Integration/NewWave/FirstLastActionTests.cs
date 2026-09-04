@@ -1,14 +1,10 @@
-﻿using FluentAssertions;
-using logrotate.Tests.Integration.GarbageTests.Wrappers;
-using logrotate.Tests.Integration.NewWave.Base;
-using System.CodeDom;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+﻿using logrotate.Tests.Integration.NewWave.Base;
+using logrotate.Tests.Integration.NewWave.Wrappers;
 using Xunit;
 using Xunit.Abstractions;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
-namespace logrotate.Tests.Integration.GarbageTests;
+namespace logrotate.Tests.Integration.NewWave;
 
 [Trait("Category", "Integration")]
 public class FirstLastActionTests : NewWaveIntegrationTestBase
@@ -27,14 +23,14 @@ public class FirstLastActionTests : NewWaveIntegrationTestBase
         Runner
             .WithLog("log-a.log", l => l.Create()
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFiles([markerFirst, markerLast], f => f
                 .ShouldBe())
             .WithConfig(c => c
                 .WithGlobalSection(s => s
                     .WithEcho(Op.FirstAction, markerFirst)
                     .WithEcho(Op.LastAction, markerLast))
-                .WithSection([XPattern.AllLogs], s => s
+                .WithSection(XPattern.AllLogs, s => s
                     .With(Op.Rotate, 2)
                     .With(Op.Monthly))
                 .Create() )
@@ -50,14 +46,14 @@ public class FirstLastActionTests : NewWaveIntegrationTestBase
         Runner
             .WithLog("log-a.log", l => l.Create()
                 .ShouldNotBe()
-                .ShouldBe(".1"))
+                .ShouldBe(Ext(".1")))
             .WithFiles([markerFirst, markerLast], f => f
                 .ShouldBe())
             .WithConfig(c => c
                 .WithGlobalSection(s => s
                     .WithEcho(Op.FirstAction, markerFirst)
                     .WithEcho(Op.LastAction, markerLast))
-                .WithSection([XPattern.AllLogs], s => s
+                .WithSection(XPattern.AllLogs, s => s
                     .With(Op.Rotate, 2)
                     .With(Op.Monthly)
                     .WithEcho(Op.FirstAction, markerFirst)
