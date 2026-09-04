@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
+using logrotate.Tests.Integration.NewWave.Base;
+using LogRotate;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,13 +17,14 @@ internal class XRunner
     public XRunner(INewWaveTests container)
     {
         _container = container;
+        State = new XStateFile(container.TestDir);
     }
 
-    public List<XBaseFile> Files;
+    public List<XBaseFile> Files { get; internal set; } = new List<XBaseFile>();
 
-    public XConfig Config;
+    public XConfig Config { get; private set; }
 
-    public XStateFile State = new XStateFile();
+    public XStateFile State { get; private set;}
 
     public bool DoForce { get; internal set; }
 
@@ -33,13 +37,13 @@ internal class XRunner
     public XRunner Run()
     {
         _container.Output.WriteLine($"Config:\r\n {File.ReadAllText(Config.Filepath)}");
-        _container.Output.WriteLine($"Files before run:\r\n {ListDirectory(TestHelpersGarbage.TestDirMy)}");
+        _container.Output.WriteLine($"Files before run:\r\n {ListDirectory(_container.TestDir)}");
 
         _container.RunLogRotate(
             DoForce ? "-f" : string.Empty,
             "--verbose", "-s", State, Config);
 
-        _container.Output.WriteLine($"Files after run:\r\n {ListDirectory(TestHelpersGarbage.TestDirMy)}");
+        _container.Output.WriteLine($"Files after run:\r\n {ListDirectory(_container.TestDir)}");
         return this;
     }
     public XRunner Check()
@@ -91,5 +95,98 @@ internal class XRunner
         return sb.ToString();
     }
 
+    public XRunner WithLogs(IEnumerable<XLogFile> logs, Action<XLogFile> init)
+    {
+        foreach (var log in logs)
+        {
+            if (null != init)
+                init(log);
+            Files.Add(log);
+        }
+        return this;
+    }
 
+    public XRunner WithLogs(IEnumerable<string> lognames, Action<XLogFile> init) 
+        => WithLogs(
+            lognames.Select(l => new XLogFile(_container.TestDir, l)), 
+            init);
+
+    public XRunner WithLog(string logname, Action<XLogFile> init) 
+        => WithLogs([logname], init);
+
+    public XRunner WithLog(XLogFile log, Action<XLogFile> init)
+        => WithLogs([log], init);
+
+
+
+    public XRunner WithState(string filename, Action<XStateFile> init)
+    {
+        var state = new XStateFile(_container.TestDir, filename);
+        if (null != init)
+            init(state);
+        State = state;
+
+        return this;
+    }
+
+    public XRunner WithState(Action<XStateFile> init)
+        => WithState(null, init);
+
+    public XRunner WithFiles(IEnumerable<XFile> files, Action<XFile> init)
+    {
+        foreach (var file in files)
+        {
+            if (null != init)
+                init(file);
+            Files.Add(file);
+        }
+        return this;
+    }
+
+    public XRunner WithFiles(IEnumerable<string> filenames, Action<XFile> init)
+        => WithFiles(
+            filenames.Select(fn => new XFile(_container.TestDir, fn)),
+            init);
+
+    public XRunner WithFile(string filename, Action<XFile> init)
+        => WithFiles([filename], init);
+
+    public XRunner WithFile(XFile file, Action<XFile> init)
+        => WithFiles([file], init);
+
+
+
+
+
+
+
+    public XRunner WithConfig(string filename, Action<XConfig> init)
+    {
+        var config = new XConfig(_container.TestDir, filename);
+        if (null != init)
+            init(config);
+        Config = config;
+        return this;
+    }
+
+    public XRunner WithConfig(Action<XConfig> init)
+    {
+        var config = new XConfig(_container.TestDir, string.Empty);
+        if (null != init)
+            init(config);
+        Config = config;
+        return this;
+    }
+
+    public XLogFile NewLog(string logname) 
+        => new XLogFile(_container.TestDir, logname);
+
+    public XFile NewFile(string logname)
+        => new XFile(_container.TestDir, logname);
+
+    public XPattern NewPattern(string pattern)
+        => new XPattern(_container.TestDir, pattern);
+
+    public XStateFile NewState(string? filename = null)
+        => new XStateFile(_container.TestDir, filename);
 }

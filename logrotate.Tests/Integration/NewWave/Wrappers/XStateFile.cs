@@ -18,19 +18,14 @@ internal class XStateFile
 
     private readonly List<string> _processed = new List<string>();
 
-    public XStateFile(string testDir, string filename)
+    public XStateFile(string testDir, string? filename)
     {
-        _testDir = string.IsNullOrEmpty(testDir) ? TestHelpersGarbage.TestDirMy : testDir;
+        _testDir = testDir;
         _filename = string.IsNullOrEmpty(filename) ? $"state-{Guid.NewGuid()}.txt" : filename;
     }
 
-    public XStateFile(string filename)
-        :this(string.Empty, filename)
-    {
-    }
-
-    public XStateFile()
-        : this(string.Empty, string.Empty)
+    public XStateFile(string testDir)
+        :this(testDir, null)
     {
     }
 
@@ -60,5 +55,5 @@ internal class XStateFile
         => stateFile.ToString();
 
     public override string ToString() 
-        => $"\"{Filepath}\"";
+        => Filepath;
 }

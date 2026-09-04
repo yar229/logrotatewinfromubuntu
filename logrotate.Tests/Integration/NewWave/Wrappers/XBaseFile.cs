@@ -7,7 +7,12 @@ namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
 
 internal abstract class XBaseFile
 {
-    protected string _testDir;
+    public XBaseFile(string testDir)
+    {
+        _testDir = testDir;
+    }
+
+    protected readonly string _testDir;
     protected string _content = string.Empty;
 
     public abstract string Type { get; }
@@ -33,6 +38,8 @@ internal abstract class XBaseFile
 
     #region ShouldBe ========================================================================
     public readonly List<string> ShouldBeList = new();
+ 
+
     public XBaseFile ShouldBe(params string[] postfixes)
     {
         if (null == postfixes || postfixes.Length == 0)
@@ -80,5 +87,5 @@ internal abstract class XBaseFile
         => stateFile.ToString();
 
     public override string ToString()
-        => $"{Filepath}";
+        => Filepath;
 }

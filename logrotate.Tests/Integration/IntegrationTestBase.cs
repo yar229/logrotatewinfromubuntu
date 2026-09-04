@@ -6,12 +6,27 @@ namespace logrotate.Tests.Integration
 {
     public abstract class IntegrationTestBase : IDisposable
     {
-        protected readonly string TestDir;
+        protected const string BaseTestDir = "c:\\1";
+
+        public string TestDir { get; internal set;}
+
         private readonly string _exePath;
 
         protected IntegrationTestBase()
-        {
-            TestDir = TestHelpers.CreateTempDirectory();
+        {   
+            if (!string.IsNullOrEmpty(BaseTestDir))
+            {
+                if (!Directory.Exists(BaseTestDir))
+                    Directory.CreateDirectory(BaseTestDir);
+
+                var testDirPath = Path.Combine(BaseTestDir, Guid.NewGuid().ToString());
+                TestDir = Directory.CreateDirectory(testDirPath).FullName;
+            }
+            else
+            {
+                TestDir = TestHelpers.CreateTempDirectory();
+            }
+            
             _exePath = GetLogRotateExePath();
         }
 

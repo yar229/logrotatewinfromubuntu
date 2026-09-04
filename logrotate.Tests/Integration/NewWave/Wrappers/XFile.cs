@@ -6,14 +6,9 @@ namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
 internal class XFile: XBaseFile
 {
     public XFile(string testDir, string filename)
+        : base(testDir)
     {
-        _testDir = string.IsNullOrEmpty(testDir) ? TestHelpersGarbage.TestDirMy : testDir;
         Filename = string.IsNullOrEmpty(filename) ? $"file-{Guid.NewGuid()}" : filename;
-    }
-
-    public XFile(string filename)
-        : this(string.Empty, filename)
-    {
     }
 
     public XFile()

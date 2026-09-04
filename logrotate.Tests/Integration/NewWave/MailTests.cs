@@ -1,55 +1,73 @@
 ﻿using FluentAssertions;
 using logrotate.Tests.Integration.GarbageTests.Wrappers;
+using logrotate.Tests.Integration.NewWave.Base;
+using LogRotate;
 using System.CodeDom;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Directives = logrotate.Config.ConfigSectionDirectives;
+using Op = logrotate.Config.ConfigSectionDirectives;
 
 namespace logrotate.Tests.Integration.GarbageTests;
 
 [Trait("Category", "Integration")]
-public class MailTests : IntegrationTestBase, INewWaveTests
+public class MailTests : NewWaveIntegrationTestBase
 {
-    public ITestOutputHelper Output { get; private set; }
-
     public MailTests(ITestOutputHelper output)
+        : base(output)
     {
-        TestHelpersGarbage.CleanupTestDir(false);
-        Output = output;
     }
-    public override void Dispose()
+
+    private const string DefaultEmail = "yar229@home.loc";
+
+    [Fact]
+    public void SimpleMailWithInplaceCmdParams_ShouldBePassed()
     {
-        TestHelpersGarbage.CleanupTestDir(false); //TODO: make true after refactoring
+        var log = Runner.NewLog("log-a.log").Create();
+        var markerMail = Runner.NewFile("marker-mail.txt");
+
+        Runner
+            .WithLog(log, l => l
+                .ShouldNotBe()
+                .ShouldBe(".1"))
+            .WithFile(markerMail, l => l
+                .ShouldBe()
+                .ShouldContain(DefaultEmail)
+                .ShouldContain($"{log}.1")
+                .ShouldNotContain(XPattern.AllLogs))
+            .WithConfig(c => c
+                .WithSection(XPattern.AllLogs, s => s
+                    .With(Op.Rotate, 1)
+                    .With(Op.MailFirst)
+                    .With(Op.Mail, DefaultEmail)
+                    .WithScript(Op.MailCmd, $"echo mail file %1 for %3 >> {markerMail}"))
+                .Create())
+            .RunAndCheck();
     }
 
     [Fact]
-    public void SimpleMailTest_ShouldBePassed()
+    public void SimpleMailWithEnviromentCmdParams_ShouldBePassed()
     {
-        var log = new XLogFile("log-a.log").Create();
-        var markerMail = new XFile("marker-mail.txt");
+        var log = Runner.NewLog("log-a.log").Create();
+        var markerMail = Runner.NewFile("marker-mail.txt");
 
-        new XRunner(this)
-        {
-            Files = [
-                log
-                   .ShouldNotBe()
-                   .ShouldBe(".1"),
-                markerMail
-                    .ShouldBe()
-                    .ShouldContain($"{log}.1")
-                    .ShouldNotContain(XPattern.AllLogs)
-            ],
-            Config = new XConfig()
-                .WithSection([XPattern.AllLogs], s => s
-                    .With(Directives.Rotate, 1)
-                    .With(Directives.MailFirst)
-                    .With(Directives.Mail, "yar229@home.loc")
-                    .WithScript(Directives.MailCmd, $"echo mail file %1 for %3 >> {markerMail}"))
-                .Create()
-        }
-        .WithForce()
-        .RunAndCheck();
+        Runner
+            .WithLog(log, l => l
+                .ShouldNotBe()
+                .ShouldBe(".1"))
+            .WithFile(markerMail, l => l
+                .ShouldBe()
+                .ShouldContain(DefaultEmail)
+                .ShouldContain($"{log}.1")
+                .ShouldNotContain(XPattern.AllLogs))
+            .WithConfig(c => c
+                .WithSection(XPattern.AllLogs, s => s
+                    .With(Op.Rotate, 1)
+                    .With(Op.MailFirst)
+                    .With(Op.Mail, DefaultEmail)
+                    .WithScript(Op.MailCmd, $"echo mail file %LOGROTATE_LOG% for %LOGROTATE_MAILTO% >> {markerMail}"))
+                .Create())
+            .RunAndCheck();
     }
 }

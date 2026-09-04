@@ -7,21 +7,10 @@ namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
 
 internal class XLogFile : XBaseFile
 {
-
     public XLogFile(string testDir, string filename)
+        :base(testDir)
     {
-        _testDir = string.IsNullOrEmpty(testDir) ? TestHelpersGarbage.TestDirMy : testDir;
         Filename = string.IsNullOrEmpty(filename) ? $"log-{Guid.NewGuid()}.log" : filename;
-    }
-
-    public XLogFile(string filename)
-        :this(string.Empty, filename)
-    {
-    }
-
-    public XLogFile()
-        : this(string.Empty, string.Empty)
-    {
     }
 
     public override string Type => "logfile";
@@ -38,5 +27,5 @@ internal class XLogFile : XBaseFile
     }
 
     public override string ToString() 
-        => $"{Filepath}";
+        => Filepath;
 }

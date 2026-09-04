@@ -10,25 +10,13 @@ internal class XPattern
 
     public XPattern(string testDir, string pattern)
     {
-        _testDir = string.IsNullOrEmpty(testDir) ? TestHelpersGarbage.TestDirMy : testDir;
+        _testDir = testDir;
         _pattern = string.IsNullOrEmpty(pattern) ? "*.*" : pattern;
     }
 
-    public XPattern(string pattern)
-        : this(string.Empty, pattern)
-    {
-    }
+    public static string All => "*.*";
 
-    public XPattern()
-        : this(string.Empty, string.Empty)
-    {
-    }
-
-    public static XPattern All
-        => new XPattern("*.*");
-
-    public static XPattern AllLogs
-        => new XPattern("*.log");
+    public static string AllLogs => "*.log";
 
 
     public string Filepath
@@ -38,5 +26,5 @@ internal class XPattern
         => pattern.ToString();
 
     public override string ToString() 
-        => $"\"{Filepath}\"";
+        => Filepath;
 }

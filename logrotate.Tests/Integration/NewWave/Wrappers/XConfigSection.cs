@@ -1,20 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
+using static System.Collections.Specialized.BitVector32;
 
 namespace logrotate.Tests.Integration.GarbageTests.Wrappers
 {
     internal class XConfigSection
     {
-        private readonly List<string> _filePatterns = new List<string>();
+        private readonly List<XPattern> _filePatterns = new List<XPattern>();
         private readonly List<string> _directives = new List<string>();
         private readonly string _testDir;
 
-        public XConfigSection(IEnumerable<string> filePatterns, string testDir)
+        public XConfigSection(IEnumerable<XPattern> filePatterns, string testDir)
         {
             _filePatterns = filePatterns.ToList();
             _testDir = testDir;
+        }
+
+        public XConfigSection(IEnumerable<string> filePatterns, string testDir)
+            : this(filePatterns
+                .Select(fp => new XPattern(testDir, fp))
+                .ToList(), testDir)
+        {
         }
 
         public XConfigSection With(string key)

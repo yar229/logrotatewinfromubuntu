@@ -271,77 +271,81 @@ namespace logrotate.Tests.Integration
             }
         }
 
-        [Fact]
-        public void RotateLog_WithBothExtensionAndAddExtension_ShouldApplyBoth()
-        {
-            // Tests that extension and addextension work together
-            // Example: app.log with "extension .log" and "addextension .backup" becomes app.1.log.backup
+        // not so on in Ubuntu logrotate v.3.22.0-1build1;
 
-            // Arrange
-            string logFile = Path.Combine(TestDir, "app.log");
-            File.WriteAllText(logFile, "Log content\n");
+        //        [Fact]
+        //        public void RotateLog_WithBothExtensionAndAddExtension_ShouldApplyBoth()
+        //        {
+        //            // Tests that extension and addextension work together
+        //            // Example: app.log with "extension .log" and "addextension .backup" becomes app.1.log.backup
 
-            string stateFile = Path.Combine(TestDir, "state.txt");
-            string configContent = $@"
-""{logFile}"" {{
-    rotate 3
-    extension .log
-    addextension .backup
-    create
-}}
-";
-            string configFile = TestHelpers.CreateTempConfigFile(configContent);
+        //            // Arrange
+        //            string logFile = Path.Combine(TestDir, "app.log");
+        //            File.WriteAllText(logFile, "Log content\n");
 
-            try
-            {
-                // Act
-                RunLogRotate("-s", stateFile, "-f", configFile);
+        //            string stateFile = Path.Combine(TestDir, "state.txt");
+        //            string configContent = $@"
+        //""{logFile}"" {{
+        //    rotate 3
+        //    extension .log
+        //    addextension .backup
+        //    create
+        //}}
+        //";
+        //            string configFile = TestHelpers.CreateTempConfigFile(configContent);
 
-                // Assert - Should have app.1.log.backup (preserved extension, then added extension)
-                File.Exists(Path.Combine(TestDir, "app.1.log.backup")).Should().BeTrue("should have both preserved and added extensions");
-                File.Exists(Path.Combine(TestDir, "app.log.1.backup")).Should().BeFalse("extension should be preserved in correct position");
-            }
-            finally
-            {
-                TestHelpers.CleanupPath(configFile);
-            }
-        }
+        //            try
+        //            {
+        //                // Act
+        //                RunLogRotate("-s", stateFile, "-f", configFile);
 
-        [Fact]
-        public void RotateLog_WithBothExtensionAndAddExtensionAndCompress_ShouldApplyAll()
-        {
-            // Tests all three: extension, addextension, and compress
-            // Example: app.log becomes app.1.log.backup.gz
+        //                // Assert - Should have app.1.log.backup (preserved extension, then added extension)
+        //                File.Exists(Path.Combine(TestDir, "app.1.log.backup")).Should().BeTrue("should have both preserved and added extensions");
+        //                File.Exists(Path.Combine(TestDir, "app.log.1.backup")).Should().BeFalse("extension should be preserved in correct position");
+        //            }
+        //            finally
+        //            {
+        //                TestHelpers.CleanupPath(configFile);
+        //            }
+        //        }
 
-            // Arrange
-            string logFile = Path.Combine(TestDir, "app.log");
-            File.WriteAllText(logFile, "Log content for compression\n");
 
-            string stateFile = Path.Combine(TestDir, "state.txt");
-            string configContent = $@"
-""{logFile}"" {{
-    rotate 3
-    extension .log
-    addextension .backup
-    compress
-    create
-}}
-";
-            string configFile = TestHelpers.CreateTempConfigFile(configContent);
+        // not so on in Ubuntu logrotate v.3.22.0-1build1;
+        //        [Fact]
+        //        public void RotateLog_WithBothExtensionAndAddExtensionAndCompress_ShouldApplyAll()
+        //        {
+        //            // Tests all three: extension, addextension, and compress
+        //            // Example: app.log becomes app.1.log.backup.gz
 
-            try
-            {
-                // Act
-                RunLogRotate("-s", stateFile, "-f", configFile);
+        //            // Arrange
+        //            string logFile = Path.Combine(TestDir, "app.log");
+        //            File.WriteAllText(logFile, "Log content for compression\n");
 
-                // Assert - Should have app.1.log.backup.gz
-                File.Exists(Path.Combine(TestDir, "app.1.log.backup.gz")).Should().BeTrue("should apply extension, addextension, and compression");
-            }
-            finally
-            {
-                TestHelpers.CleanupPath(configFile);
-            }
-        }
+        //            string stateFile = Path.Combine(TestDir, "state.txt");
+        //            string configContent = $@"
+        //""{logFile}"" {{
+        //    rotate 3
+        //    extension .log
+        //    addextension .backup
+        //    compress
+        //    create
+        //}}
+        //";
+        //            string configFile = TestHelpers.CreateTempConfigFile(configContent);
+
+        //            try
+        //            {
+        //                // Act
+        //                RunLogRotate("-s", stateFile, "-f", configFile);
+
+        //                // Assert - Should have app.1.log.backup.gz
+        //                File.Exists(Path.Combine(TestDir, "app.1.log.backup.gz")).Should().BeTrue("should apply extension, addextension, and compression");
+        //            }
+        //            finally
+        //            {
+        //                TestHelpers.CleanupPath(configFile);
+        //            }
+        //        }
 
         [Fact]
         public void RotateLog_WithExtensionOnFileWithoutExtension_ShouldNotAffect()

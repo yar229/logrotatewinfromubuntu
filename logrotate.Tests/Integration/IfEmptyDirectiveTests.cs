@@ -171,7 +171,7 @@ namespace logrotate.Tests.Integration
 
             // Config with ifempty
             string configIfEmpty = $@"
-{logFileIfEmpty} {{
+""{logFileIfEmpty}"" {{
     ifempty
     rotate 2
     create
@@ -181,7 +181,7 @@ namespace logrotate.Tests.Integration
 
             // Config with notifempty
             string configNotIfEmpty = $@"
-{logFileNotIfEmpty} {{
+""{logFileNotIfEmpty}"" {{
     notifempty
     rotate 2
     create
@@ -192,8 +192,8 @@ namespace logrotate.Tests.Integration
             try
             {
                 // Act - Run both configs
-                RunLogRotate("-s", stateFile, "-f", configFileIfEmpty);
-                RunLogRotate("-s", stateFile, "-f", configFileNotIfEmpty);
+                RunLogRotate("-s", stateFile, configFileIfEmpty);
+                RunLogRotate("-s", stateFile, configFileNotIfEmpty);
 
                 // Assert - ifempty should rotate, notifempty should not
                 File.Exists($"{logFileIfEmpty}.1").Should().BeTrue("ifempty should allow rotation of empty files");

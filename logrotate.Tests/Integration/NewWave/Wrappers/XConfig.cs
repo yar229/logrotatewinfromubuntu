@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace logrotate.Tests.Integration.GarbageTests.Wrappers;
 
@@ -12,32 +13,38 @@ internal class XConfig
 
     public XConfig(string testDir, string filename)
     {
-        _testDir = string.IsNullOrEmpty(testDir) ? TestHelpersGarbage.TestDirMy : testDir;
+        _testDir = testDir;
         _filename = string.IsNullOrEmpty(_filename) ? $"config-{Guid.NewGuid()}.conf" : filename;
     }
-
-    public XConfig(string filename)
-        : this(string.Empty, filename)
-    {
-    }
-
-    public XConfig()
-        : this(string.Empty, string.Empty)
-    {
-    }
-
-
+   
     public string Filepath
         => Path.Combine(_testDir, _filename);
 
     public XConfig WithSection(IEnumerable<string> patterns, Action<XConfigSection> init)
     {
+        if (!patterns.Any())
+            throw new ArgumentException($"patterns must not be empty in {nameof(XConfig)}.{nameof(WithSection)}");
+
         var section = new XConfigSection(patterns, _testDir);
         if (init != null)
             init(section);
         _sections.Add(section);
         return this;
     }
+
+    public XConfig WithSection(string pattern, Action<XConfigSection> init) 
+        => WithSection([pattern], init);
+
+    public XConfig WithGlobalSection(Action<XConfigSection> init)
+    {
+        var section = new XConfigSection(Enumerable.Empty<XPattern>(), _testDir);
+        if (init != null)
+            init(section);
+        _sections.Add(section);
+        return this;
+    }
+
+
 
     public XConfig Create()
     {
@@ -50,5 +57,5 @@ internal class XConfig
         => config.ToString();
 
     public override string ToString()
-        => $"\"{Filepath}\"";
+        => Filepath;
 }
