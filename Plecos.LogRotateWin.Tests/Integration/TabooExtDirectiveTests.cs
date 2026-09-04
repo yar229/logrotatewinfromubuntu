@@ -29,7 +29,7 @@ namespace logrotate.Tests.Integration
             // Create a valid config file in the include directory
             string validConfig = Path.Combine(includeDir, "valid.conf");
             string validConfigContent = $@"
-{logFile1} {{
+""{logFile1}"" {{
     rotate 2
     create
 }}
@@ -39,7 +39,7 @@ namespace logrotate.Tests.Integration
             // Create a .swp config file (should be skipped by default)
             string swpConfig = Path.Combine(includeDir, "editor.swp");
             string swpConfigContent = $@"
-{logFile2} {{
+""{logFile2}"" {{
     rotate 2
     create
 }}
@@ -48,7 +48,7 @@ namespace logrotate.Tests.Integration
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfigContent = $@"
-include ""{includeDir}""
+include {includeDir}
 ";
             string configFile = TestHelpers.CreateTempConfigFile(mainConfigContent);
 
@@ -109,7 +109,7 @@ include ""{includeDir}""
             // Create a .bak file (should be skipped with custom tabooext)
             string bakConfig = Path.Combine(includeDir, "backup.bak");
             string bakConfigContent = $@"
-{logFile3} {{
+""{logFile3}"" {{
     rotate 2
     create
 }}
@@ -119,7 +119,7 @@ include ""{includeDir}""
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfigContent = $@"
 tabooext .bak .old
-include ""{includeDir}""
+include {includeDir}
 ";
             string configFile = TestHelpers.CreateTempConfigFile(mainConfigContent);
 
@@ -160,7 +160,7 @@ include ""{includeDir}""
             // Create a .conf file (should be processed)
             string confConfig = Path.Combine(includeDir, "valid.conf");
             string confConfigContent = $@"
-{logFile1} {{
+""{logFile1}"" {{
     rotate 2
     create
 }}
@@ -170,7 +170,7 @@ include ""{includeDir}""
             // Create a .swp file (should be skipped - default taboo)
             string swpConfig = Path.Combine(includeDir, "editor.swp");
             string swpConfigContent = $@"
-{logFile2} {{
+""{logFile2}"" {{
     rotate 2
     create
 }}
@@ -180,7 +180,7 @@ include ""{includeDir}""
             // Create a .bak file (should be skipped - added to taboo)
             string bakConfig = Path.Combine(includeDir, "backup.bak");
             string bakConfigContent = $@"
-{logFile3} {{
+""{logFile3}"" {{
     rotate 2
     create
 }}
@@ -190,7 +190,7 @@ include ""{includeDir}""
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfigContent = $@"
 tabooext + .bak .old
-include ""{includeDir}""
+include {includeDir}
 ";
             string configFile = TestHelpers.CreateTempConfigFile(mainConfigContent);
 

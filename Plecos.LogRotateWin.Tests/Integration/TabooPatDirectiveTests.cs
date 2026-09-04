@@ -29,13 +29,13 @@ namespace logrotate.Tests.Integration
 
             // Create config files
             File.WriteAllText(goodConfig, $@"
-{testLog} {{
+""{testLog}"" {{
     rotate 1
     create
 }}
 ");
             File.WriteAllText(backupConfig, $@"
-{testLog} {{
+""{testLog}"" {{
     rotate 99
     create
 }}
@@ -83,19 +83,19 @@ include {includeDir}
 
             // Create config files
             File.WriteAllText(goodConfig, $@"
-{testLog} {{
+""{testLog}"" {{
     rotate 1
     create
 }}
 ");
             File.WriteAllText(tmpConfig, $@"
-{testLog} {{
+""{testLog}"" {{
     rotate 2
     create
 }}
 ");
             File.WriteAllText(bakConfig, $@"
-{testLog} {{
+""{testLog}"" {{
     rotate 3
     create
 }}
@@ -141,9 +141,21 @@ include {includeDir}
             string testLog = Path.Combine(TestDir, "test.log");
             File.WriteAllText(testLog, "Log content\n");
 
-            File.WriteAllText(goodConfig, $@"{testLog} {{ rotate 1 create }}");
-            File.WriteAllText(tmpConfig, $@"{testLog} {{ rotate 2 create }}");
-            File.WriteAllText(bakConfig, $@"{testLog} {{ rotate 3 create }}");
+            File.WriteAllText(goodConfig, $@"
+""{testLog}"" {{ 
+    rotate 1 
+    create 
+}}");
+            File.WriteAllText(tmpConfig, $@"
+""{testLog}"" {{ 
+    rotate 2 
+    create 
+}}");
+            File.WriteAllText(bakConfig, $@"
+""{testLog}"" {{ 
+    rotate 3 
+    create 
+}}");
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfig = $@"
@@ -185,8 +197,16 @@ include {includeDir}
             string testLog = Path.Combine(TestDir, "test.log");
             File.WriteAllText(testLog, "Log content\n");
 
-            File.WriteAllText(tmpConfig, $@"{testLog} {{ rotate 1 create }}");
-            File.WriteAllText(bakConfig, $@"{testLog} {{ rotate 2 create }}");
+            File.WriteAllText(tmpConfig, $@"
+""{testLog}"" {{ 
+    rotate 1 
+    create 
+}}");
+            File.WriteAllText(bakConfig, $@"
+""{testLog}"" {{ 
+    rotate 2 
+    create 
+}}");
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfig = $@"
@@ -229,9 +249,21 @@ include {includeDir}
             string testLog = Path.Combine(TestDir, "test.log");
             File.WriteAllText(testLog, "Log content\n");
 
-            File.WriteAllText(config1, $@"{testLog} {{ rotate 1 create }}");
-            File.WriteAllText(config2, $@"{testLog} {{ rotate 2 create }}");
-            File.WriteAllText(configAbc, $@"{testLog} {{ rotate 3 create }}");
+            File.WriteAllText(config1, $@"
+""{testLog}"" {{ 
+    rotate 1 
+    create 
+}}");
+            File.WriteAllText(config2, $@"
+""{testLog}"" {{ 
+    rotate 2 
+    create 
+}}");
+            File.WriteAllText(configAbc, $@"
+""{testLog}"" {{ 
+    rotate 3 
+    create 
+}}");
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfig = $@"
@@ -273,9 +305,21 @@ include {includeDir}
             string testLog = Path.Combine(TestDir, "test.log");
             File.WriteAllText(testLog, "Log content\n");
 
-            File.WriteAllText(confFile, $@"{testLog} {{ rotate 1 create }}");
-            File.WriteAllText(rpmsaveFile, $@"{testLog} {{ rotate 2 create }}");
-            File.WriteAllText(bakFile, $@"{testLog} {{ rotate 3 create }}");
+            File.WriteAllText(confFile, $@"
+""{testLog}"" {{ 
+    rotate 1 
+    create 
+}}");
+            File.WriteAllText(rpmsaveFile, $@"
+""{testLog}"" {{ 
+    rotate 2 
+    create 
+}}");
+            File.WriteAllText(bakFile, $@"
+""{testLog}"" {{ 
+    rotate 3 
+    create 
+}}");
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfig = $@"
@@ -318,9 +362,21 @@ include {includeDir}
             string testLog = Path.Combine(TestDir, "test.log");
             File.WriteAllText(testLog, "Log content\n");
 
-            File.WriteAllText(prodConfig, $@"{testLog} {{ rotate 1 create }}");
-            File.WriteAllText(testConfig, $@"{testLog} {{ rotate 2 create }}");
-            File.WriteAllText(devConfig, $@"{testLog} {{ rotate 3 create }}");
+            File.WriteAllText(prodConfig, $@"
+""{testLog}"" {{ 
+    rotate 1 
+    create 
+}}");
+            File.WriteAllText(testConfig, $@"
+""{testLog}"" {{ 
+    rotate 2 
+    create 
+}}");
+            File.WriteAllText(devConfig, $@"
+""{testLog}"" {{ 
+    rotate 3 
+    create 
+}}");
 
             string stateFile = Path.Combine(TestDir, "state.txt");
             string mainConfig = $@"
