@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogRotate.Consts;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +12,7 @@ internal static class MailSender
                                   int logNum, LogInfo log)
     {
         var result = ProcessRunner.RunScript(mailCommand, mailFilename, null, 
-            ("LOGROTATE_MAILTO", log.LogAddress));
+            (EnviromentVariables.MailTo, log.LogAddress));
         return result;
     }
 

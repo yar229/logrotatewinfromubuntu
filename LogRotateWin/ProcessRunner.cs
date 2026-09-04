@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic;
+﻿using LogRotate.Consts;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -177,8 +178,8 @@ namespace LogRotate
             params (string EnvVar, string Value)[] additionalParams)
         {
             var args = new List<(string EnvVar, string Value)>(additionalParams.Length + 2);
-            args.Add(new ("LOGROTATE_LOG", logFilename));
-            args.Add(new ("LOGROTATE_LOGROTATED", logRotatedFilename));
+            args.Add(new (EnviromentVariables.Log, logFilename));
+            args.Add(new (EnviromentVariables.LogRotated, logRotatedFilename));
             args.AddRange(additionalParams);
 
             string tempScriptFilepath = string.Empty;
