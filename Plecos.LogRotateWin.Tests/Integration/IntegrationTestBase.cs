@@ -99,12 +99,12 @@ namespace logrotate.Tests.Integration
             string testBinDir = Path.GetDirectoryName(testAssemblyPath);
 
             // Navigate to solution root and find the exe
-            string exePath = Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "logrotate-dotnet", "bin", "Debug", "net10.0", "logrotate.exe"));
+            string exePath = Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "LogRotateWin", "bin", "Debug", "net10.0", "logrotate.exe"));
 
             // If debug build doesn't exist, try release
             if (!File.Exists(exePath))
             {
-                exePath = Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "logrotate-dotnet", "bin", "Release", "net10.0", "logrotate.exe"));
+                exePath = Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "LogRotateWin", "bin", "Release", "net10.0", "logrotate.exe"));
             }
 
             // If still not found, throw a helpful error
@@ -112,8 +112,8 @@ namespace logrotate.Tests.Integration
             {
                 throw new FileNotFoundException(
                     $"Could not find logrotate.exe. Looked in:\n" +
-                    $"- {Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "logrotate-dotnet", "bin", "Debug", "net10.0", "logrotate.exe"))}\n" +
-                    $"- {Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "logrotate-dotnet", "bin", "Release", "net10.0", "logrotate.exe"))}\n" +
+                    $"- {Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "LogRotateWin", "bin", "Debug", "net10.0", "logrotate.exe"))}\n" +
+                    $"- {Path.GetFullPath(Path.Combine(testBinDir, "..", "..", "..", "..", "LogRotateWin", "bin", "Release", "net10.0", "logrotate.exe"))}\n" +
                     $"Test bin directory: {testBinDir}\n" +
                     $"CodeBase: {testAssemblyCodeBase}"
                 );

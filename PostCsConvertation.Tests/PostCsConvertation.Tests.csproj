@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Integration\NewWave\1\**" />
-    <EmbeddedResource Remove="Integration\NewWave\1\**" />
-    <None Remove="Integration\NewWave\1\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="10.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,7 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\logrotate-dotnet\LogRotate.csproj" />
+    <ProjectReference Include="..\LogRotateWin\LogRotateWin.csproj" />
+    <ProjectReference Include="..\Plecos.LogRotateWin.Tests\Plecos.LogRotateWin.Tests.csproj" />
   </ItemGroup>
 
 

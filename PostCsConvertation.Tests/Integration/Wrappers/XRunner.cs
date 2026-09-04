@@ -1,13 +1,13 @@
 ﻿using FluentAssertions;
-using logrotate.Tests.Integration.NewWave.Base;
 using LogRotate;
+using PostCsConvertation.Tests.Integration.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace logrotate.Tests.Integration.NewWave.Wrappers;
+namespace PostCsConvertation.Tests.Integration.Wrappers;
 
 internal class XRunner
 {

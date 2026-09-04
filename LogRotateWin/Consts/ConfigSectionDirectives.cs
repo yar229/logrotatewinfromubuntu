@@ -16,7 +16,6 @@ public static class ConfigSectionDirectives
     public const string NoRenameCopy = "norenamecopy";
     public const string Create = "create";
     public const string NoCreate = "nocreate";
-    public const string Minutes = "minutes";
     public const string Hourly = "hourly";
     public const string Daily = "daily";
     public const string DelayCompress = "delaycompress";
@@ -75,6 +74,7 @@ public static class ConfigSectionDirectives
     //public const string LogfileOpenRetry = "logfileopen_retry";
     //public const string LogfileOpenMsBetweenRetryAttempts = "logfileopen_msbetweenretryattempts";
     //public const string LogfileOpenNumRetryAttempts = "logfileopen_numretryattempts";
+    //public const string Minutes = "minutes";
 
     //removed in logrotatewin
     public const string AllowHardlink = "allowhardlink";

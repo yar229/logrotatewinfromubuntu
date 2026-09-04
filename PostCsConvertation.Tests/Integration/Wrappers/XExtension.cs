@@ -1,4 +1,4 @@
-﻿namespace logrotate.Tests.Integration.NewWave.Wrappers;
+﻿namespace PostCsConvertation.Tests.Integration.Wrappers;
 
 public class XExtension
 {

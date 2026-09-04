@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace logrotate.Tests.Integration.NewWave.Base;
+namespace PostCsConvertation.Tests.Integration.Base;
 
 public interface INewWaveTests
 {

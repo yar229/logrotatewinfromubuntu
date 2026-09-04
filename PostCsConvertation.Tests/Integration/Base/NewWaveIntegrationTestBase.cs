@@ -1,7 +1,8 @@
-﻿using logrotate.Tests.Integration.NewWave.Wrappers;
+﻿using logrotate.Tests.Integration;
+using PostCsConvertation.Tests.Integration.Wrappers;
 using Xunit;
 
-namespace logrotate.Tests.Integration.NewWave.Base;
+namespace PostCsConvertation.Tests.Integration.Base;
 
 public abstract class NewWaveIntegrationTestBase : IntegrationTestBase, INewWaveTests
 {

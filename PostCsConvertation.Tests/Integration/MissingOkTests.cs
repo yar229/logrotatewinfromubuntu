@@ -1,13 +1,13 @@
 ﻿using FluentAssertions;
-using logrotate.Tests.Integration.NewWave.Base;
-using logrotate.Tests.Integration.NewWave.Wrappers;
+using PostCsConvertation.Tests.Integration.Base;
+using PostCsConvertation.Tests.Integration.Wrappers;
 using System;
 using System.IO;
 using System.Text;
 using Xunit;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
-namespace logrotate.Tests.Integration.NewWave;
+namespace PostCsConvertation.Tests.Integration;
 
 
 /// <summary>
@@ -24,8 +24,6 @@ public class MissingOkTests : NewWaveIntegrationTestBase
     {
     }
 
-
-
     [Fact]
     public void RotateLog_WithMissingOkDefault_ShouldError()
     {
@@ -33,7 +31,7 @@ public class MissingOkTests : NewWaveIntegrationTestBase
 
         Runner
             .WithLog(log, l => l
-                .ShouldBe()
+                .ShouldNotBe()
                 .ShouldNotBe(Ext(".1")))
             .WithConfig(c => c
                 .WithSection(log, s => s
@@ -43,36 +41,6 @@ public class MissingOkTests : NewWaveIntegrationTestBase
             .RunAndCheck()
             .Should()
             .NotBe(0, $"absent {Op.MissingOk} behavior should fail on missing files");
-
-
-
-    //    // Tests default behavior - missing files don't cause errors
-
-    //    // Arrange
-    //    string logFile = Path.Combine(TestDir, "nonexistent.log");
-    //    // Deliberately don't create the file
-
-    //    string stateFile = Path.Combine(TestDir, "state.txt");
-    //    string configContent = $@"
-    //""{logFile}"" {{
-    //    rotate 3
-    //    create
-    //}}
-    //";
-    //    string configFile = TestHelpers.CreateTempConfigFile(configContent);
-
-    //    try
-    //    {
-    //        // Act
-    //        var exitCode = RunLogRotate("-s", stateFile, "-f", configFile);
-
-    //        // Assert - Default behavior should not error on missing files
-    //        exitCode.Should().Be(0, "default missingok behavior should not error on missing files");
-    //    }
-    //    finally
-    //    {
-    //        TestHelpers.CleanupPath(configFile);
-    //    }
     }
 
     [Fact(DisplayName = $"{Op.MinAge} should prevents rotation of files younger than specified days")]

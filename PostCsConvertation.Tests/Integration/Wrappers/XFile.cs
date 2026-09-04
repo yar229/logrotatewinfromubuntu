@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace logrotate.Tests.Integration.NewWave.Wrappers;
+namespace PostCsConvertation.Tests.Integration.Wrappers;
 
 internal class XFile: XBaseFile
 {

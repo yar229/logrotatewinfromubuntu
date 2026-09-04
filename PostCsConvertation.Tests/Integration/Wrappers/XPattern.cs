@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace logrotate.Tests.Integration.NewWave.Wrappers;
+namespace PostCsConvertation.Tests.Integration.Wrappers;
 
 internal class XPattern
 {

@@ -1,10 +1,10 @@
-﻿using logrotate.Tests.Integration.NewWave.Base;
+﻿using PostCsConvertation.Tests.Integration.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace logrotate.Tests.Integration.NewWave.Wrappers;
+namespace PostCsConvertation.Tests.Integration.Wrappers;
 
 internal class XStateFile
 {

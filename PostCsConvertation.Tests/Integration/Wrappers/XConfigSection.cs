@@ -1,9 +1,9 @@
-﻿using logrotate.Tests.Integration.NewWave.Base;
+﻿using PostCsConvertation.Tests.Integration.Base;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace logrotate.Tests.Integration.NewWave.Wrappers
+namespace PostCsConvertation.Tests.Integration.Wrappers
 {
     internal class XConfigSection
     {

@@ -1,12 +1,12 @@
 ﻿using FluentAssertions;
-using logrotate.Tests.Integration.NewWave.Base;
-using logrotate.Tests.Integration.NewWave.Wrappers;
+using PostCsConvertation.Tests.Integration.Base;
+using PostCsConvertation.Tests.Integration.Wrappers;
 using System;
 using System.IO;
 using Xunit;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
-namespace logrotate.Tests.Integration.NewWave;
+namespace PostCsConvertation.Tests.Integration;
 
 
 /// <summary>

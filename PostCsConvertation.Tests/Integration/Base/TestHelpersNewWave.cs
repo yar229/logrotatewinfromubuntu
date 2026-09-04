@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace logrotate.Tests.Integration.NewWave.Base;
+namespace PostCsConvertation.Tests.Integration.Base;
 
 public static class TestHelpersNewWave
 {
