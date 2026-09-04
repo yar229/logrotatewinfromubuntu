@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using System.IO;
 using Xunit;
 
@@ -89,7 +89,7 @@ include ""{includeDir}""
             // Create a .conf file (should be processed)
             string confConfig = Path.Combine(includeDir, "valid.conf");
             string confConfigContent = $@"
-{logFile1} {{
+""{logFile1}"" {{
     rotate 2
     create
 }}
@@ -99,7 +99,7 @@ include ""{includeDir}""
             // Create a .swp file (should now be processed since we're replacing taboo list)
             string swpConfig = Path.Combine(includeDir, "editor.swp");
             string swpConfigContent = $@"
-{logFile2} {{
+""{logFile2}"" {{
     rotate 2
     create
 }}

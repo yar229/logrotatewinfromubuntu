@@ -69,11 +69,12 @@ namespace logrotate.Tests.Integration
             string configContent = $@"
 ""{logFile}"" {{
     rotate 3
+    createolddir
     olddir {oldDir}
     renamecopy
     create
 }}
-";
+";  // createolddir required if dir not exists
             string configFile = TestHelpers.CreateTempConfigFile(configContent);
 
             try

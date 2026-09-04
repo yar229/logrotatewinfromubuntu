@@ -93,13 +93,14 @@ namespace logrotate.Tests.Integration
         [Fact]
         public void RotateLog_WithFirstActionScript_ShouldExecuteOnce()
         {
+            // WRONG
             // firstaction is a GLOBAL directive that executes before any log rotations
             // It runs once per logrotate execution, not per file
 
             // Arrange
             string log1 = Path.Combine(TestDir, "app1.log");
-            string log2 = Path.Combine(TestDir, "app2.log");
             File.WriteAllText(log1, "App 1 log\n");
+            string log2 = Path.Combine(TestDir, "app2.log");
             File.WriteAllText(log2, "App 2 log\n");
 
             string markerFile = Path.Combine(TestDir, "firstaction_marker.txt");
@@ -111,7 +112,7 @@ firstaction
     echo FirstAction executed > ""{markerFile}""
 endscript
 
-{log1} {log2} {{
+""{log1}"" ""{log2}"" {{
     rotate 2
 }}
 ";
@@ -160,7 +161,7 @@ lastaction
     echo LastAction executed > ""{markerFile}""
 endscript
 
-{log1} {log2} {{
+""{log1}"" ""{log2}"" {{
     rotate 2
 }}
 ";
@@ -242,8 +243,9 @@ endscript
             string postMarkerFile = Path.Combine(TestDir, "post_marker.txt");
             
             string stateFile = Path.Combine(TestDir, "state.txt");
-            File.WriteAllText(stateFile, $"# logrotate state file created {DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss")}\r\nlogrotate state -- version 2\r\n\"{logFileB}\" {DateTime.Now.ToString("yyyy-M-d")}");
-
+            // example: 2026-9-5-0:15:2
+            File.WriteAllText(stateFile, $"logrotate state -- version 2\r\n\"{logFileB}\" {DateTime.Now.ToString("yyyy-M-d-h:m:s")}");
+            
             string configContent = $@"
 ""{logFileA}"" ""{logFileB}"" {{
     rotate 2
@@ -331,7 +333,7 @@ endscript
             File.WriteAllText(counterFile, "0");
 
             string configContent = $@"
-{log1} {log2} {{
+""{log1}"" ""{log2}"" {{
     rotate 2
     sharedscripts
     postrotate
@@ -373,7 +375,7 @@ endscript
             string stateFile = Path.Combine(TestDir, "state.txt");
 
             string configContent = $@"
-{log1} {log2} {{
+""{log1}"" ""{log2}"" {{
     rotate 2
     nosharedscripts
     postrotate
