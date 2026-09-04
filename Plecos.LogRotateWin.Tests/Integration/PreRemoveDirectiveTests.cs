@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using LogRotate.Consts;
 using System;
 using System.IO;
 using Xunit;
@@ -254,9 +255,10 @@ namespace logrotate.Tests.Integration
 ""{logFile}"" {{
     rotate 1
     dateext
+    dateformat %Y-%m-%d-%H-%M-%S
     create
     preremove
-        echo Removing dated file > ""{markerFile}""
+        echo Removing dated file %{EnviromentVariables.Log}% > ""{markerFile}""
     endscript
 }}
 ";

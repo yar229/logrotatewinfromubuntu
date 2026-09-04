@@ -1,4 +1,5 @@
-﻿using PostCsConvertation.Tests.Integration.Base;
+﻿using LogRotate.Consts;
+using PostCsConvertation.Tests.Integration.Base;
 using PostCsConvertation.Tests.Integration.Wrappers;
 using Xunit;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
@@ -60,7 +61,7 @@ public class MailTests : NewWaveIntegrationTestBase
                     .With(Op.Rotate, 1)
                     .With(Op.MailFirst)
                     .With(Op.Mail, DefaultEmail)
-                    .WithScript(Op.MailCmd, $"echo mail file %LOGROTATE_LOG% for %LOGROTATE_MAILTO% >> {markerMail}"))
+                    .WithScript(Op.MailCmd, $"echo mail file %{EnviromentVariables.Log}% for %{EnviromentVariables.MailTo}% >> {markerMail}"))
                 .Create())
             .RunAndCheck();
     }
