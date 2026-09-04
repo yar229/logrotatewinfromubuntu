@@ -1,7 +1,6 @@
 ﻿using logrotate.Tests.Integration.NewWave.Base;
 using logrotate.Tests.Integration.NewWave.Wrappers;
 using Xunit;
-using Xunit.Abstractions;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
 namespace logrotate.Tests.Integration.NewWave;

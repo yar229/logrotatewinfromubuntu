@@ -93,7 +93,7 @@ namespace logrotate.Tests.Integration
         private string GetLogRotateExePath()
         {
             // Use CodeBase instead of Location to get the actual file path (not shadow copy)
-            string testAssemblyCodeBase = this.GetType().Assembly.CodeBase;
+            string testAssemblyCodeBase = this.GetType().Assembly.Location;
             Uri uri = new Uri(testAssemblyCodeBase);
             string testAssemblyPath = Uri.UnescapeDataString(uri.AbsolutePath);
             string testBinDir = Path.GetDirectoryName(testAssemblyPath);

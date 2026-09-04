@@ -1,5 +1,5 @@
 ﻿using logrotate.Tests.Integration.NewWave.Wrappers;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace logrotate.Tests.Integration.NewWave.Base;
 
