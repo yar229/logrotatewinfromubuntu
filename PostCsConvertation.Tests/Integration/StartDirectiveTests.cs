@@ -22,21 +22,21 @@ public class StartDirectiveTests : NewWaveIntegrationTestBase
     {
     }
 
-    [Fact(DisplayName = $"{Op.Start} cannot be zero")]
-    public void RotateLog_WithStart0_ShouldFail()
+    [Fact(DisplayName = $"{Op.Start} with zero")]
+    public void RotateLog_WithStart0_ShouldPass()
     {
         var log = Runner.NewLog().Create();
 
         Runner
-            .WithLog(log, l => l
-                .ShouldBe()
-                .ShouldNotBe(Ext(".1")))
+            .WithLog(log, l => l.Create()
+                .ShouldNotBe()
+                .ShouldBe(Ext(".0")))
             .WithConfig(c => c
                 .WithSection(log, s => s
                     .With(Op.Rotate, 3)
                     .With(Op.Start, 0))
                 .Create())
             .RunAndCheck()
-            .ExitCode.Should().NotBe(0, $"'{Op.Start}' directive cannot be zero");
+            .ExitCode.Should().Be(0, $"'{Op.Start}' directive can be zero");
     }
 }
