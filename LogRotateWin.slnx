@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Tests/">
+    <Project Path="LogRotateWin.LegacyTests/LogRotateWin.LegacyTests.csproj" />
     <Project Path="Plecos.LogRotateWin.Tests/Plecos.LogRotateWin.Tests.csproj" />
     <Project Path="PostCsConvertation.Tests/PostCsConvertation.Tests.csproj" />
   </Folder>
