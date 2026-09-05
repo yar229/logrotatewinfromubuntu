@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -47,7 +47,8 @@ namespace LogRotate
                 numBase = 16;
                 i += 2;
             }
-            else if (i < s.Length && s[i] == '0')
+            else if (i < s.Length && s[i] == '0' 
+                && s.Length > 1) //fix for parsing single digit to base10
             {
                 numBase = 8;
                 i++;
