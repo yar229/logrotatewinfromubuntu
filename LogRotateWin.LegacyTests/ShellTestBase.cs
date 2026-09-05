@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -349,7 +349,7 @@ public abstract class ShellTestBase : IDisposable
     protected virtual string MailerScript => """
         @echo off
         echo %* > mail-out
-        more >> mail-out
+        REM //me since mail behavior has changed  more >> mail-out
         """;
 
     /// <summary>Windows counterpart of the 'compress' shell script.</summary>
