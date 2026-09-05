@@ -39,7 +39,7 @@ public class NoMissingOkTests : NewWaveIntegrationTestBase
                     .With(Op.Rotate, 3))
                 .Create())
             .RunAndCheck()
-            .Should().NotBe(0, "logrotate should fail when logfile missing");
+            .ExitCode.Should().NotBe(0, "logrotate should fail when logfile missing");
     }
 
     [Fact(DisplayName = $"{Op.NoMissingOk} processes files that exist and skips those that don't")]
@@ -64,6 +64,6 @@ public class NoMissingOkTests : NewWaveIntegrationTestBase
                     .With(Op.Rotate, 3))
                 .Create())
             .RunAndCheck()
-            .Should().NotBe(0, "existing logs should be rotated, but still returns error");
+            .ExitCode.Should().NotBe(0, "existing logs should be rotated, but still returns error");
     }
 }

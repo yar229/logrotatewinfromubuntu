@@ -9,4 +9,6 @@ public interface INewWaveTests
     int RunLogRotate(params string[] args);
 
     string TestDir { get; }
+
+    string Log { get; }
 }

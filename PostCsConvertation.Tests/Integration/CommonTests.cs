@@ -1,4 +1,5 @@
-﻿using PostCsConvertation.Tests.Integration.Base;
+﻿using FluentAssertions;
+using PostCsConvertation.Tests.Integration.Base;
 using PostCsConvertation.Tests.Integration.Wrappers;
 using Xunit;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
@@ -11,6 +12,24 @@ public class CommonTests : NewWaveIntegrationTestBase
     public CommonTests(ITestOutputHelper output)
         : base(output)
     {
+    }
+
+    [Fact]
+    public void SingleLineConfig_ShoudNotBeParsed()
+    {
+        Runner // this behavior checked on real logrotate 3.22.0 / Ubuntu
+            .WithLog(s => s.Create())
+            .WithConfig(c => c
+                .WithSection(XPattern.AllLogs, s => s
+                    .With(Op.Rotate, 2)
+                    .With(Op.Monthly))
+                .Create(lineSeparator: " "))
+            .RunAndCheck()
+            .Should(r =>
+            { 
+                r.ExitCode.Should().Be(0, "I dunno wtf - config parsing error but logfiles are rotated and zero returned");
+                r.Log.Should().MatchRegex("error:.*? bad rotation count", "there must be error in execution log");
+            });
     }
 
     [Fact]

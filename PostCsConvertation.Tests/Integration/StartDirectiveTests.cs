@@ -37,6 +37,6 @@ public class StartDirectiveTests : NewWaveIntegrationTestBase
                     .With(Op.Start, 0))
                 .Create())
             .RunAndCheck()
-            .Should().NotBe(0, $"'{Op.Start}' directive cannot be zero");
+            .ExitCode.Should().NotBe(0, $"'{Op.Start}' directive cannot be zero");
     }
 }
