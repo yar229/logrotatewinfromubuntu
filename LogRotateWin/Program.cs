@@ -96,7 +96,7 @@ namespace LogRotate
                         Console.WriteLine("    Default uncompress command: {0}", Options.DefaultUncompressCommand);
                         Console.WriteLine("    Default compress extension: {0}", Options.DefaultCompressExt);
                         Console.WriteLine("    Default state file path:    {0}", Options.DefaultStateFile);
-                        Console.WriteLine("    ACL support:                no");
+                        Console.WriteLine("    ACL support:                yes");
                         Console.WriteLine("    SELinux support:            no");
                         return 0;
                     case "-?":

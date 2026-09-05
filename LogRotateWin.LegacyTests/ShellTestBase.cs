@@ -137,6 +137,36 @@ public abstract class ShellTestBase : IDisposable
     // test-common.sh helpers
     // =====================================================================
 
+    /// <summary>
+    /// Well-known "Everyone" SID (S-1-1-0), the stand-in for the POSIX named
+    /// user "nobody" in the ACL tests (32/33/35/48).
+    /// </summary>
+    protected static System.Security.Principal.SecurityIdentifier
+        EveryoneSid { get; } =
+        new(System.Security.Principal.WellKnownSidType.WorldSid, null);
+
+    /// <summary>
+    /// Stand-in for `setfacl -m u:nobody:rwx`: grants the Everyone SID Full
+    /// Access on a file inside TestDir via icacls.
+    /// </summary>
+    protected void GrantEveryoneAccess(string relativePath)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "icacls.exe",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        psi.ArgumentList.Add(P(relativePath));
+        psi.ArgumentList.Add("/grant");
+        psi.ArgumentList.Add($"*{EveryoneSid.Value}:(F)");
+
+        using var p = Process.Start(psi);
+        p!.WaitForExit();
+        p.ExitCode.Should().Be(0);
+    }
+
     /// <summary>Maps log "number" to the word written by createlog().</summary>
     public static string Word(int num) => num switch
     {

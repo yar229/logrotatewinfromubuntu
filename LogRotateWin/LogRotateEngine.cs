@@ -559,6 +559,10 @@ namespace LogRotate
                 return 1;
             }
 
+            /* writeState(): remember the old state file's access ACL so the
+             * replacement keeps it (mirrors acl_get_fd in logrotate.c). */
+            byte[]? prevAcl = AclApi.ReadDacl(stateFilename);
+
             string tmpFilename = stateFilename + ".tmp";
             /* Remove possible tmp state file from previous run */
             if (File.Exists(tmpFilename))
@@ -612,6 +616,14 @@ namespace LogRotate
                 Log.Message(MESS.ERROR, "error creating temp state file {0}: {1}\n", tmpFilename, ex.Message);
                 FileUtil.DeleteFile(tmpFilename);
                 return 1;
+            }
+
+            /* carry over the old state file's access ACL to the replacement
+             * (mirrors createOutputFile(tmpFilename, ..., prev_acl, force_mode)) */
+            if (prevAcl != null && prevAcl.Length > 0
+                    && !AclApi.WriteDacl(tmpFilename, prevAcl))
+            {
+                Log.Message(MESS.ERROR, "setting ACL for {0}: failed\n", tmpFilename);
             }
 
             if (!FileUtil.Rename(tmpFilename, stateFilename))
@@ -1871,6 +1883,16 @@ namespace LogRotate
             if (!state.DoRotate)
                 return 0;
 
+            /* logrotate.c rotateSingleLog(): remember the old log's access ACL
+             * so the newly created log can inherit it (WITH_ACL). */
+            byte[]? prevAcl = null;
+            if ((log.Flags & LogFlags.Create) != 0
+                    && log.CreateMode == Sentinel.NO_MODE
+                    && (log.Flags & (LogFlags.CopyTruncate | LogFlags.Copy)) == 0)
+            {
+                prevAcl = AclApi.ReadDacl(log.Files[logNum]);
+            }
+
             if ((log.Flags & (LogFlags.CopyTruncate | LogFlags.Copy)) == 0)
             {
                 if ((log.Flags & LogFlags.TmpFilename) != 0)
@@ -1934,7 +1956,18 @@ namespace LogRotate
                         if (fd == null)
                             hasErrors = true;
                         else
+                        {
                             fd.Dispose();
+                            /* give the fresh log the old log's access ACL
+                             * (mirrors acl_set_fd in createOutputFile(); the
+                             * reference only does this when 'create' has no
+                             * mode, since chmod would overwrite the ACL). */
+                            if (prevAcl != null && prevAcl.Length > 0
+                                    && !AclApi.WriteDacl(log.Files[logNum], prevAcl))
+                            {
+                                Log.Message(MESS.ERROR, "setting ACL for {0}: failed\n", log.Files[logNum]);
+                            }
+                        }
                     }
                 }
             }
