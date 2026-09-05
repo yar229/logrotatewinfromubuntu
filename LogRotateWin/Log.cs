@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 
 namespace LogRotate
@@ -54,7 +54,10 @@ namespace LogRotate
         {
             if (level >= _logLevel)
             {
-                LogOnce(Console.Error, level, format, args);
+                if (level < MESS.WARN)
+                    LogOnce(Console.Out, level, format, args);
+                else
+                    LogOnce(Console.Error, level, format, args);
             }
 
             if (_messageFile != null)
