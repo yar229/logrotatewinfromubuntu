@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Security.Principal;
 using System.Text;
 using System.Xml.Linq;
 
@@ -1958,14 +1959,32 @@ namespace LogRotate
                         else
                         {
                             fd.Dispose();
-                            /* give the fresh log the old log's access ACL
-                             * (mirrors acl_set_fd in createOutputFile(); the
-                             * reference only does this when 'create' has no
-                             * mode, since chmod would overwrite the ACL). */
-                            if (prevAcl != null && prevAcl.Length > 0
-                                    && !AclApi.WriteDacl(log.Files[logNum], prevAcl))
+
+                            SecurityIdentifier? ownerSid = null;
+                            if (log.CreateOwnerSid != null)
+                                ownerSid = new SecurityIdentifier(log.CreateOwnerSid);
+                            SecurityIdentifier? groupSid = null;
+                            if (log.CreateGroupSid != null)
+                                groupSid = new SecurityIdentifier(log.CreateGroupSid);
+
+                            if (log.CreateMode == Sentinel.NO_MODE)
                             {
-                                Log.Message(MESS.ERROR, "setting ACL for {0}: failed\n", log.Files[logNum]);
+                                /* no explicit mode: hand the fresh log over to the
+                                 * requested owner/group and copy the old log's
+                                 * access ACL (mirrors fchown + acl_set_fd). */
+                                AclApi.ApplyOwnerGroup(log.Files[logNum], ownerSid, groupSid);
+                                if (prevAcl != null && prevAcl.Length > 0
+                                        && !AclApi.WriteDacl(log.Files[logNum], prevAcl))
+                                {
+                                    Log.Message(MESS.ERROR, "setting ACL for {0}: failed\n", log.Files[logNum]);
+                                }
+                            }
+                            else
+                            {
+                                /* explicit mode: materialize it as a Windows DACL
+                                 * (owner/group class -> resolved SIDs), i.e. the
+                                 * chmod equivalent performed by the reference. */
+                                AclApi.ApplyCreateAcl(log.Files[logNum], createMode, ownerSid, groupSid);
                             }
                         }
                     }
