@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Security.Principal;
 using System.Text;
 using System.Xml.Linq;
 
@@ -559,6 +560,10 @@ namespace LogRotate
                 return 1;
             }
 
+            /* writeState(): remember the old state file's access ACL so the
+             * replacement keeps it (mirrors acl_get_fd in logrotate.c). */
+            byte[]? prevAcl = AclApi.ReadDacl(stateFilename);
+
             string tmpFilename = stateFilename + ".tmp";
             /* Remove possible tmp state file from previous run */
             if (File.Exists(tmpFilename))
@@ -612,6 +617,14 @@ namespace LogRotate
                 Log.Message(MESS.ERROR, "error creating temp state file {0}: {1}\n", tmpFilename, ex.Message);
                 FileUtil.DeleteFile(tmpFilename);
                 return 1;
+            }
+
+            /* carry over the old state file's access ACL to the replacement
+             * (mirrors createOutputFile(tmpFilename, ..., prev_acl, force_mode)) */
+            if (prevAcl != null && prevAcl.Length > 0
+                    && !AclApi.WriteDacl(tmpFilename, prevAcl))
+            {
+                Log.Message(MESS.ERROR, "setting ACL for {0}: failed\n", tmpFilename);
             }
 
             if (!FileUtil.Rename(tmpFilename, stateFilename))
@@ -1871,6 +1884,16 @@ namespace LogRotate
             if (!state.DoRotate)
                 return 0;
 
+            /* logrotate.c rotateSingleLog(): remember the old log's access ACL
+             * so the newly created log can inherit it (WITH_ACL). */
+            byte[]? prevAcl = null;
+            if ((log.Flags & LogFlags.Create) != 0
+                    && log.CreateMode == Sentinel.NO_MODE
+                    && (log.Flags & (LogFlags.CopyTruncate | LogFlags.Copy)) == 0)
+            {
+                prevAcl = AclApi.ReadDacl(log.Files[logNum]);
+            }
+
             if ((log.Flags & (LogFlags.CopyTruncate | LogFlags.Copy)) == 0)
             {
                 if ((log.Flags & LogFlags.TmpFilename) != 0)
@@ -1934,7 +1957,36 @@ namespace LogRotate
                         if (fd == null)
                             hasErrors = true;
                         else
+                        {
                             fd.Dispose();
+
+                            SecurityIdentifier? ownerSid = null;
+                            if (log.CreateOwnerSid != null)
+                                ownerSid = new SecurityIdentifier(log.CreateOwnerSid);
+                            SecurityIdentifier? groupSid = null;
+                            if (log.CreateGroupSid != null)
+                                groupSid = new SecurityIdentifier(log.CreateGroupSid);
+
+                            if (log.CreateMode == Sentinel.NO_MODE)
+                            {
+                                /* no explicit mode: hand the fresh log over to the
+                                 * requested owner/group and copy the old log's
+                                 * access ACL (mirrors fchown + acl_set_fd). */
+                                AclApi.ApplyOwnerGroup(log.Files[logNum], ownerSid, groupSid);
+                                if (prevAcl != null && prevAcl.Length > 0
+                                        && !AclApi.WriteDacl(log.Files[logNum], prevAcl))
+                                {
+                                    Log.Message(MESS.ERROR, "setting ACL for {0}: failed\n", log.Files[logNum]);
+                                }
+                            }
+                            else
+                            {
+                                /* explicit mode: materialize it as a Windows DACL
+                                 * (owner/group class -> resolved SIDs), i.e. the
+                                 * chmod equivalent performed by the reference. */
+                                AclApi.ApplyCreateAcl(log.Files[logNum], createMode, ownerSid, groupSid);
+                            }
+                        }
                     }
                 }
             }

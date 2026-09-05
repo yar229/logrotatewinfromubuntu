@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Principal;
 using System.Text;
 using Op = LogRotate.Consts.ConfigSectionDirectives;
 
@@ -143,9 +144,10 @@ namespace LogRotate
             return key;
         }
 
-        private static bool ResolveUid(string userName, out long uid)
+private static bool ResolveUid(string userName, out long uid, out string? sid)
         {
             uid = Sentinel.NO_UID;
+            sid = null;
             if (string.Equals(userName, "root", StringComparison.Ordinal))
             {
                 uid = 0;
@@ -157,12 +159,21 @@ namespace LogRotate
                 Log.Message(MESS.DEBUG, "note: numeric uid {0} accepted (POSIX user lookup is not available on Windows)\n", parsed);
                 return true;
             }
+            if (TryResolveWindowsAccount(userName, out SecurityIdentifier? s))
+            {
+                sid = s.Value;
+                uid = LastSidSubAuthority(sid);
+                Log.Message(MESS.DEBUG, "note: Windows user '{0}' resolved to {1} (uid {2})\n",
+                    userName, sid, uid);
+                return true;
+            }
             return false;
         }
 
-        private static bool ResolveGid(string groupName, out long gid)
+        private static bool ResolveGid(string groupName, out long gid, out string? sid)
         {
             gid = Sentinel.NO_GID;
+            sid = null;
             if (string.Equals(groupName, "root", StringComparison.Ordinal))
             {
                 gid = 0;
@@ -174,14 +185,64 @@ namespace LogRotate
                 Log.Message(MESS.DEBUG, "note: numeric gid {0} accepted (POSIX group lookup is not available on Windows)\n", parsed);
                 return true;
             }
+            if (TryResolveWindowsAccount(groupName, out SecurityIdentifier? s))
+            {
+                sid = s.Value;
+                gid = LastSidSubAuthority(sid);
+                Log.Message(MESS.DEBUG, "note: Windows group '{0}' resolved to {1} (gid {2})\n",
+                    groupName, sid, gid);
+                return true;
+            }
             return false;
+        }
+
+        /// <summary>
+        /// Resolves a Windows account name (user or group) to a SID. Plain names
+        /// are tried against the local machine as well as a few well-known
+        /// prefixes, so 'Administrators', 'SYSTEM' or 'YAR\yar229' all work.
+        /// </summary>
+        private static bool TryResolveWindowsAccount(string name, out SecurityIdentifier? sid)
+        {
+            var candidates = new[] { name,
+                ".\\" + name, Environment.MachineName + "\\" + name,
+                "BUILTIN\\" + name, "NT AUTHORITY\\" + name };
+            foreach (var candidate in candidates)
+            {
+                try
+                {
+                    var s = (SecurityIdentifier)new NTAccount(candidate).Translate(typeof(SecurityIdentifier));
+                    if (s != null)
+                    {
+                        sid = s;
+                        return true;
+                    }
+                }
+                catch (Exception)
+                {
+                    /* try the next spelling */
+                }
+            }
+            sid = null;
+            return false;
+        }
+
+        /// <summary>
+        /// The rightmost sub-authority of a SID, used as a POSIX-like uid/gid
+        /// number (e.g. 'Administrators' S-1-5-32-544 -> 544).
+        /// </summary>
+        private static long LastSidSubAuthority(string sidValue)
+        {
+            int lastDash = sidValue.LastIndexOf('-');
+            return long.TryParse(sidValue.Substring(lastDash + 1),
+                NumberStyles.None, CultureInfo.InvariantCulture, out long rid) ? rid : 0;
         }
 
         /// <summary>
         /// readModeUidGid() port. Returns true on error.
         /// </summary>
-        private static bool ReadModeUidGid(string configFile, int lineNum, string directive,
-                                           string value, ref long mode, ref long uid, ref long gid)
+private static bool ReadModeUidGid(string configFile, int lineNum, string directive,
+                                           string value, ref long mode, ref long uid, ref long gid,
+                                           ref string? ownerSid, ref string? groupSid)
         {
             bool isSu = directive == Op.Su;
             int i = 0;
@@ -261,10 +322,10 @@ namespace LogRotate
                 groupstr = null;
             }
 
-            bool error = false;
+bool error = false;
             if (groupstr != null)
             {
-                if (!ResolveGid(groupstr, out gid))
+                if (!ResolveGid(groupstr, out gid, out groupSid))
                 {
                     Log.Message(MESS.ERROR, "{0}:{1} unknown group '{2}'\n",
                         configFile, lineNum, groupstr);
@@ -273,7 +334,7 @@ namespace LogRotate
             }
             if (userstr != null)
             {
-                if (!ResolveUid(userstr, out uid))
+                if (!ResolveUid(userstr, out uid, out ownerSid))
                 {
                     Log.Message(MESS.ERROR, "{0}:{1} unknown user '{2}'\n",
                         configFile, lineNum, userstr);
@@ -405,9 +466,11 @@ namespace LogRotate
             to.CompressExt = from.CompressExt;
             to.Flags = from.Flags;
             to.ShredCycles = from.ShredCycles;
-            to.CreateMode = from.CreateMode;
+to.CreateMode = from.CreateMode;
             to.CreateUid = from.CreateUid;
             to.CreateGid = from.CreateGid;
+            to.CreateOwnerSid = from.CreateOwnerSid;
+            to.CreateGroupSid = from.CreateGroupSid;
             to.SuUid = from.SuUid;
             to.SuGid = from.SuGid;
             to.OlddirMode = from.OlddirMode;
@@ -448,9 +511,11 @@ namespace LogRotate
             target.CompressExt = copy.CompressExt;
             target.Flags = copy.Flags;
             target.ShredCycles = copy.ShredCycles;
-            target.CreateMode = copy.CreateMode;
+target.CreateMode = copy.CreateMode;
             target.CreateUid = copy.CreateUid;
             target.CreateGid = copy.CreateGid;
+            target.CreateOwnerSid = copy.CreateOwnerSid;
+            target.CreateGroupSid = copy.CreateGroupSid;
             target.SuUid = copy.SuUid;
             target.SuGid = copy.SuGid;
             target.OlddirMode = copy.OlddirMode;
@@ -794,9 +859,12 @@ namespace LogRotate
                                     }
                                     goto error;
                                 }
-                                long tmpMode = Sentinel.NO_MODE;
+long tmpMode = Sentinel.NO_MODE;
+                                string? unusedOwnerSid = null;
+                                string? unusedGroupSid = null;
                                 bool err = ReadModeUidGid(configFile, lineNum, Op.Su, key,
-                                    ref tmpMode, ref newlog.SuUid, ref newlog.SuGid);
+                                    ref tmpMode, ref newlog.SuUid, ref newlog.SuGid,
+                                    ref unusedOwnerSid, ref unusedGroupSid);
                                 if (err)
                                 {
                                     if (newlog != defConfig)
@@ -848,7 +916,8 @@ namespace LogRotate
                                     continue;
 
                                 bool err = ReadModeUidGid(configFile, lineNum, Op.Create, key,
-                                    ref newlog.CreateMode, ref newlog.CreateUid, ref newlog.CreateGid);
+                                    ref newlog.CreateMode, ref newlog.CreateUid, ref newlog.CreateGid,
+                                    ref newlog.CreateOwnerSid, ref newlog.CreateGroupSid);
                                 if (err)
                                 {
                                     if (newlog != defConfig)
@@ -866,8 +935,11 @@ namespace LogRotate
                                 if (key == null)
                                     continue;
 
+string? olddirOwnerSid = null;
+                                string? olddirGroupSid = null;
                                 bool err = ReadModeUidGid(configFile, lineNum, Op.CreateOldDir, key,
-                                    ref newlog.OlddirMode, ref newlog.OlddirUid, ref newlog.OlddirGid);
+                                    ref newlog.OlddirMode, ref newlog.OlddirUid, ref newlog.OlddirGid,
+                                    ref olddirOwnerSid, ref olddirGroupSid);
                                 if (newlog.OlddirMode == Sentinel.NO_MODE)
                                     newlog.OlddirMode = 0x1ED; // 0755
 

@@ -315,6 +315,24 @@ public class Tests0094_0112 : ShellTestBase
     }
 
     /// <summary>
+    /// DEVIATION from the reference: 'create' accepts Windows account names
+    /// for owner and group (instead of POSIX uid/gid lookups). They are
+    /// resolved to SIDs and the SID's last sub-authority is used as the uid/
+    /// gid number, so e.g. Everyone (S-1-1-0) maps to 0.
+    /// </summary>
+    [Fact]
+    public void Test0110_WindowsUserGroupNamesInCreate()
+    {
+        WriteFile("test1.log", "zero\n");
+        GenConfig("test-config.110win", Config110Win);
+
+        Run("test-config.110win", "--force");
+        ExitCode.Should().Be(0);
+        Log.Should().Contain("resolved to S-1-1-0");
+        Log.Should().Contain("test1.log mode = 0600 uid = 0 gid = 0");
+    }
+
+    /// <summary>
     /// Test 111: '%z' dateformat specifier (timezone offset) - the old
     /// dated log from a previous timezone epoch is pruned, the other stays.
     /// </summary>
@@ -538,6 +556,14 @@ public class Tests0094_0112 : ShellTestBase
             daily
             rotate 1
             su "foo bar" 'bar baz'
+        }
+        """;
+
+    private const string Config110Win = """
+        "&DIR&/test1.log" {
+            daily
+            rotate 1
+            create 0600 Everyone Everyone
         }
         """;
 
