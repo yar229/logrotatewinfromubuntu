@@ -1,4 +1,5 @@
 using FluentAssertions;
+using LogRotate;
 using System;
 using System.IO;
 using Xunit;
@@ -33,13 +34,60 @@ public class Tests0031_0040 : ShellTestBase
     }
 
     /// <summary>
-    /// Tests 32/33/35: ACLs are Linux-only (setfacl/getfacl); LogRotateWin is
-    /// built with "ACL support: no", like the reference without libacl.
-    /// The upstream suite itself skips these with exit 77 when ACLs are absent.
+    /// Tests 32/33/35: ACLs. LogRotateWin now mirrors the reference WITH_ACL
+    /// behavior for 'create': when no mode is given the access ACL of the old
+    /// log is copied onto the newly created log (tests 32, 35); an explicit
+    /// mode suppresses the copy, as chmod would overwrite the ACL (test 33).
+    /// DEVIATION: POSIX setfacl/getfacl and the "user:nobody:rwx" principal
+    /// don't exist on Windows, so the well-known "Everyone" SID (S-1-1-0) is
+    /// granted via icacls and verified through the shared LogRotate.AclApi
+    /// helper. The "group::---" base assertions are dropped (Windows has no
+    /// POSIX group class).
     /// </summary>
-    [Fact(Skip = "Linux-only: ACL tests use setfacl/getfacl; port built without ACL support")]
+    [Fact]
     public void Test0032_And_0033_And_0035_ACL()
     {
+        // Test 32: 'create' without mode -> ACLs are respected.
+        Preptest("test.log", 1);
+        GenConfig("test-config.32", Config32);
+        GrantEveryoneAccess("test.log");
+        Run("test-config.32", "--force");
+        ExitCode.Should().Be(0);
+        AclApi.DefinesAccessAce(P("test.log"), EveryoneSid)
+            .Should().BeTrue("test.log must keep the ACL copied from the old log");
+        AclApi.DefinesAccessAce(P("test.log.1"), EveryoneSid)
+            .Should().BeTrue("test.log.1 is the rotated original and must keep its ACL");
+        CheckOutput(
+            OutputExpectation.Content("test.log", ""),
+            OutputExpectation.Content("test.log.1", "zero"));
+
+        // Test 33: mode in 'create' -> ACLs are overwritten (chmod).
+        Preptest("test.log", 1);
+        GenConfig("test-config.33", Config33);
+        GrantEveryoneAccess("test.log");
+        Run("test-config.33", "--force");
+        ExitCode.Should().Be(0);
+        AclApi.DefinesAccessAce(P("test.log"), EveryoneSid)
+            .Should().BeFalse("an explicit create mode must reset the ACL");
+        AclApi.DefinesAccessAce(P("test.log.1"), EveryoneSid)
+            .Should().BeTrue("test.log.1 is the rotated original and must keep its ACL");
+        CheckOutput(
+            OutputExpectation.Content("test.log", ""),
+            OutputExpectation.Content("test.log.1", "zero"));
+
+        // Test 35: 'create' with user/group but no mode -> ACLs respected.
+        Preptest("test.log", 1);
+        GenConfig("test-config.35", Config35);
+        GrantEveryoneAccess("test.log");
+        Run("test-config.35", "--force");
+        ExitCode.Should().Be(0);
+        AclApi.DefinesAccessAce(P("test.log"), EveryoneSid)
+            .Should().BeTrue("test.log must keep the ACL copied from the old log");
+        AclApi.DefinesAccessAce(P("test.log.1"), EveryoneSid)
+            .Should().BeTrue("test.log.1 is the rotated original and must keep its ACL");
+        CheckOutput(
+            OutputExpectation.Content("test.log", ""),
+            OutputExpectation.Content("test.log.1", "zero"));
     }
 
     /// <summary>
@@ -130,6 +178,33 @@ public class Tests0031_0040 : ShellTestBase
         "&DIR&/test.log" {
             daily
             rotate 999
+        }
+        """;
+
+    private const string Config32 = """
+        create
+
+        "&DIR&/test.log" {
+            daily
+            rotate 999
+        }
+        """;
+
+    private const string Config33 = """
+        create 0600
+
+        "&DIR&/test.log" {
+            daily
+            rotate 999
+        }
+        """;
+
+    private const string Config35 = """
+        create 0 0
+
+        "&DIR&/test.log" {
+            daily
+            rotate 1
         }
         """;
 

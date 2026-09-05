@@ -1,4 +1,5 @@
 using FluentAssertions;
+using LogRotate;
 using System;
 using System.IO;
 using Xunit;
@@ -43,12 +44,26 @@ public class Tests0046_0053 : ShellTestBase
     }
 
     /// <summary>
-    /// Test 48: ACLs on the state file. Linux-only (same skip the reference
-    /// applies via test-common-acl.sh when ACL support is missing).
+    /// Test 48: the state file keeps its ACLs (writeState copies the old state
+    /// file's access ACL onto the rewritten one).
+    /// DEVIATION: icacls + the well-known Everyone SID stand in for POSIX
+    /// setfacl (see Test0032_And_0033_And_0035_ACL); "chmod 0640" is dropped.
     /// </summary>
-    [Fact(Skip = "Linux-only: ACL tests use setfacl/getfacl; port built without ACL support")]
+    [Fact]
     public void Test0048_StateFileACL()
     {
+        Preptest("test.log", 1);
+        GenConfig("test-config.48", Config48);
+        State("logrotate state -- version 2");
+        GrantEveryoneAccess("state");
+        Run("test-config.48");
+        ExitCode.Should().Be(0);
+
+        AclApi.DefinesAccessAce(P("state"), EveryoneSid)
+            .Should().BeTrue("state file must keep its ACL user:nobody:rwx");
+        CheckOutput(
+            OutputExpectation.Content("test.log", ""),
+            OutputExpectation.Content("test.log.1", "zero"));
     }
 
     /// <summary>
@@ -180,6 +195,16 @@ public class Tests0046_0053 : ShellTestBase
             daily
             rotate 999
             dateext
+        }
+        """;
+
+    private const string Config48 = """
+        create
+
+        "&DIR&/test.log" {
+            daily
+            rotate 999
+            size 2
         }
         """;
 
