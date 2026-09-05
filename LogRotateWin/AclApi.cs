@@ -139,15 +139,25 @@ namespace LogRotate
                  * (both need SeRestorePrivilege/WRITE_OWNER); the chmod part -
                  * an explicit DACL - merely needs WRITE_DAC and is what the
                  * mode actually boils down to. */
-                rc = SetNamedSecurityInfoW(path, SE_FILE_OBJECT,
+                uint daclRc = SetNamedSecurityInfoW(path, SE_FILE_OBJECT,
                     DACL_SECURITY_INFORMATION,
                     IntPtr.Zero, IntPtr.Zero,
                     daclHandle.AddrOfPinnedObject(), IntPtr.Zero);
-                if (rc == 0)
+                if (daclRc == 0)
+                {
+                    Log.Message(MESS.WARN,
+                        "warning: could not change owner/group of {0} ({1}); "
+                            + "applied access rights only\n"
+                            + "  changing the owner/group requires "
+                            + "SeRestorePrivilege/WRITE_OWNER, i.e. running "
+                            + "logrotate as Administrator; Windows does not let "
+                            + "a normal user change a file's owner\n",
+                        path, Win32ErrorText(rc));
                     return;
+                }
 
                 Log.Message(MESS.ERROR, "setting ACL mode for {0}: failed ({1})\n",
-                    path, Win32ErrorText(rc));
+                    path, Win32ErrorText(daclRc));
             }
             finally
             {
@@ -179,6 +189,16 @@ namespace LogRotate
                     ownerHandle.IsAllocated ? ownerHandle.AddrOfPinnedObject() : IntPtr.Zero,
                     groupHandle.IsAllocated ? groupHandle.AddrOfPinnedObject() : IntPtr.Zero,
                     IntPtr.Zero, IntPtr.Zero);
+                if (rc != 0)
+                    Log.Message(MESS.WARN,
+                        "warning: could not transfer owner/group of {0} to the "
+                            + "requested accounts ({1}); keeping the current "
+                            + "owner/group\n"
+                            + "  changing the owner/group requires "
+                            + "SeRestorePrivilege/WRITE_OWNER, i.e. running "
+                            + "logrotate as Administrator; Windows does not let "
+                            + "a normal user change a file's owner\n",
+                        path, Win32ErrorText(rc));
                 return rc == 0;
             }
             finally
