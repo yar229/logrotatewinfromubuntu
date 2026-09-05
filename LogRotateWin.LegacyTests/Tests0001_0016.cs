@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using System;
 using System.IO;
 using Xunit;
@@ -125,7 +125,7 @@ public class Tests0001_0016 : ShellTestBase
             OutputExpectation.Content("scriptout", "foo"));
     }
 
-    [Fact(Skip = "Deviation: LogRotateWin rejects 'start 0' (reference accepts it; see PostCsConvertation.Tests 'start cannot be zero').")]
+    [Fact]
     public void Test0006_StartZeroSingleFile()
     {
         Preptest("test.log", 1);
@@ -172,7 +172,7 @@ public class Tests0001_0016 : ShellTestBase
         CheckMail("test.log", "zero");
     }
 
-    [Fact(Skip = "Deviation: LogRotateWin rejects 'rotate 0' (reference accepts it; numeric zero values fail to parse).")]
+    [Fact]
     public void Test0009_CompressRotateZeroMailFirst()
     {
         Preptest("test.log", 1);
