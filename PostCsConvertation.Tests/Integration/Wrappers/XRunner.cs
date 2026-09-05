@@ -38,11 +38,14 @@ internal class XRunner
         _container.Output.WriteLine($"Config:\r\n {File.ReadAllText(Config.Filepath)}");
         _container.Output.WriteLine($"Files before run:\r\n {ListDirectory(_container.TestDir)}");
 
-        _container.RunLogRotate(
+        ExitCode = _container.RunLogRotate(
             DoForce ? "-f" : string.Empty,
             "--verbose", "-s", State, Config);
 
         _container.Output.WriteLine($"Files after run:\r\n {ListDirectory(_container.TestDir)}");
+
+        _container.Output.WriteLine("Execution Log:");
+        _container.Output.WriteLine(_container.Log);
         return this;
     }
     public XRunner Check()
@@ -80,6 +83,10 @@ internal class XRunner
         return this;
     }
 
+    public string Log => _container.Log;
+
+    public int? ExitCode { get; private set; }
+
     public XRunner RunAndCheck()
     {
         Run();
@@ -87,6 +94,13 @@ internal class XRunner
         return this;
     }
 
+    public XRunner Should(Action<XRunner> action)
+    {
+        if (null != action)
+            action(this);
+
+        return this;
+    }
 
     private static string ListDirectory(string path, int indentLevel = 0)
     {

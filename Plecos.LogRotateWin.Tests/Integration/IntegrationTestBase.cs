@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace logrotate.Tests.Integration
 {
@@ -9,6 +10,8 @@ namespace logrotate.Tests.Integration
         protected const string BaseTestDir = "c:\\1";
 
         public string TestDir { get; internal set;}
+
+        public string Log { get; private set; }
 
         private readonly string _exePath;
 
@@ -51,6 +54,7 @@ namespace logrotate.Tests.Integration
             psi.RedirectStandardError = true;
             psi.CreateNoWindow = true;
 
+            var sbLog = new StringBuilder();
 
             using (Process process = new Process())
             {
@@ -62,8 +66,10 @@ namespace logrotate.Tests.Integration
                 {
                     if (e.Data != null)
                     {
+                        var outline = $"[OUTPUT]: {e.Data}";
                         // Write the line to your debug output immediately
-                        System.Diagnostics.Debug.WriteLine($"[OUTPUT]: {e.Data}");
+                        System.Diagnostics.Debug.WriteLine(outline);
+                        sbLog.AppendLine(outline);
                     }
                 };
 
@@ -71,8 +77,10 @@ namespace logrotate.Tests.Integration
                 {
                     if (e.Data != null)
                     {
+                        var errline = $"[ERROR]: {e.Data}";
                         // Write the line to your debug output immediately
-                        System.Diagnostics.Debug.WriteLine($"[ERROR]: {e.Data}");
+                        System.Diagnostics.Debug.WriteLine(errline);
+                        sbLog.AppendLine(errline);
                     }
                 };
 
@@ -85,6 +93,8 @@ namespace logrotate.Tests.Integration
 
                 process.CancelOutputRead();
                 process.CancelErrorRead();
+
+                Log = sbLog.ToString();
 
                 return process.ExitCode;
             }

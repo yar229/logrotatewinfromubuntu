@@ -46,9 +46,11 @@ internal class XConfig
 
 
 
-    public XConfig Create()
+    public XConfig Create(string? lineSeparator = null)
     {
-        var content = string.Join("\r\n", _sections);
+        if (null == lineSeparator)
+            lineSeparator = Environment.NewLine;
+        var content = string.Join(lineSeparator, _sections.Select(s => s.ToString(lineSeparator)));
         File.WriteAllText(Filepath, content);
         return this;
     }

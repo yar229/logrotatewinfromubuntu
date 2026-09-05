@@ -1,4 +1,6 @@
-﻿using PostCsConvertation.Tests.Integration.Base;
+﻿using LogRotate.Consts;
+using PostCsConvertation.Tests.Integration.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,20 +63,23 @@ namespace PostCsConvertation.Tests.Integration.Wrappers
             return this;
         }
 
-        public override string ToString()
+        public override string ToString() 
+            => ToString(Environment.NewLine);
+
+        public string ToString(string lineSeparator)
         {
             var sb = new StringBuilder();
 
             if (!_filePatterns.Any())  //global section
             { 
                 foreach (var directive in _directives)
-                    sb.AppendLine(directive);
+                    sb.Append(directive + lineSeparator);
                 return sb.ToString();
             }
 
-            sb.AppendLine(string.Join(" ", _filePatterns.Select(fp => TestHelpersNewWave.Quote(fp))) + " {");
+            sb.Append(string.Join(" ", _filePatterns.Select(fp => TestHelpersNewWave.Quote(fp))) + " {" + lineSeparator);
             foreach (var str in _directives)
-                sb.AppendLine($"\t{str}");
+                sb.Append($"\t{str}{lineSeparator}");
             sb.Append("}");
 
             return sb.ToString();
